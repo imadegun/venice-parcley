@@ -143,6 +143,18 @@
 }
 
 @layer utilities {
+  .mobile-header {
+    z-index: 100;
+  }
+
+  .mobile-bottom-cta {
+    z-index: 100;
+  }
+
+  .hero-content-layer {
+    z-index: 1;
+  }
+
   @keyframes cinematicLoop {
     0% {
       transform: translate3d(0%, 0, 0) scale(1.15);

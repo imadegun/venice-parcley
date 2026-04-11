@@ -6,9 +6,27 @@ import { ArrowRight, MapPin, Users, Star } from "lucide-react"
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-24 md:pb-0">
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Mobile Intro Copy */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-[12px] md:text-sm uppercase tracking-[0.28em] text-slate-600 font-montserrat mb-5">
+              SHORELINE VIBES
+            </p>
+            <h1 className="text-[30px] md:text-5xl font-semibold text-gray-900 leading-tight font-josefin mb-4">
+              Life at Shoreline, wrapped in artful calm and cinematic sea light.
+            </h1>
+            <div className="mx-auto mb-7 h-[2px] w-24 bg-gradient-to-r from-transparent via-slate-500 to-transparent" />
+            <p className="text-base md:text-lg text-gray-600 font-mulish px-[30px] md:px-0 leading-8">
+              Drift through curated spaces, coastal textures, and boutique rhythms designed for guests who savor design-forward stays.
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Featured Apartments */}
       <section className="py-16 bg-white">
@@ -140,6 +158,16 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Sticky Mobile Bottom CTA */}
+      <div className="mobile-bottom-cta fixed bottom-0 left-0 right-0 md:hidden px-3 pb-3">
+        <Link
+          href="/apartments"
+          className="flex h-14 w-full items-center justify-center rounded-t-[20px] bg-pink-500 text-white font-montserrat text-sm font-semibold uppercase tracking-[0.18em] shadow-[0_-6px_20px_rgba(0,0,0,0.2)]"
+        >
+          BOOK NOW
+        </Link>
+      </div>
     </div>
   );
 }

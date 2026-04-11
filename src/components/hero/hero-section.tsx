@@ -42,9 +42,9 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative z-[1] mt-[10px] h-[min(80vh,700px)] aspect-[4/5] w-full overflow-hidden rounded-bl-[60px] rounded-br-[60px] md:mt-0 md:h-screen md:aspect-auto md:rounded-bl-[40px] md:rounded-br-[40px]">
       {/* Background Images */}
-      <div className="absolute inset-0 overflow-hidden rounded-bl-[40px] rounded-br-[40px]">
+      <div className="absolute inset-0 overflow-hidden rounded-bl-[60px] rounded-br-[60px] md:rounded-bl-[40px] md:rounded-br-[40px]">
         {heroContent.backgroundImages.map((image, index) => (
           <div
             key={index}
@@ -73,69 +73,48 @@ export function HeroSection() {
       </div>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40 rounded-bl-[40px] rounded-br-[40px]" />
+      <div className="absolute inset-0 bg-black/40 rounded-bl-[60px] rounded-br-[60px] md:rounded-bl-[40px] md:rounded-br-[40px]" />
 
       {/* Top White-to-Transparent Fade (Hero-only) */}
-      <div className="absolute top-0 left-0 right-0 z-[5] h-24 bg-gradient-to-b from-white/75 via-white/30 to-transparent rounded-bl-[40px] rounded-br-[40px] pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 z-[5] h-24 bg-gradient-to-b from-white/75 via-white/30 to-transparent rounded-bl-[60px] rounded-br-[60px] md:rounded-bl-[40px] md:rounded-br-[40px] pointer-events-none" />
 
       {/* Navigation Arrows */}
       <Button
         variant="ghost"
         size="sm"
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 text-white hover:bg-white/20"
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 text-white hover:bg-white/20 md:left-4"
         onClick={prevImage}
       >
-        <ChevronLeft className="w-8 h-8" />
+        <ChevronLeft className="w-7 h-7 md:w-8 md:h-8" />
       </Button>
 
       <Button
         variant="ghost"
         size="sm"
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 text-white hover:bg-white/20"
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 text-white hover:bg-white/20 md:right-4"
         onClick={nextImage}
       >
-        <ChevronRight className="w-8 h-8" />
+        <ChevronRight className="w-7 h-7 md:w-8 md:h-8" />
       </Button>
 
       {/* Content */}
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-        <h1 className="text-5xl md:text-7xl font-semibold mb-6 leading-tight font-josefin">
+      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-6 md:px-4">
+        <h1 className="text-[30px] md:text-7xl font-semibold mb-4 md:mb-6 leading-tight font-josefin">
           {heroContent.title[currentLang]}
         </h1>
-        <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto">
+        <p className="text-base md:text-2xl mb-6 md:mb-8 text-white/90 max-w-2xl mx-auto px-2 md:px-0">
           {heroContent.subtitle[currentLang]}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button size="lg" className="text-lg px-8 py-4 bg-white text-black hover:bg-white/90">
+          {/* <Button size="lg" className="text-lg px-8 py-4 bg-white text-black hover:bg-white/90">
             {heroContent.ctaText[currentLang]}
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-black"
-            onClick={() => {
-              const apartmentsSection = document.getElementById('apartments')
-              apartmentsSection?.scrollIntoView({ behavior: 'smooth' })
-            }}
-          >
-            View Property Types
-          </Button>
+          </Button> */}
+          {/* View Property Types button disabled temporarily */}
         </div>
       </div>
 
-      {/* Image Indicators */}
-      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-        {heroContent.backgroundImages.map((_, index) => (
-          <button
-            key={index}
-            className={`w-2 h-2 rounded-full transition-colors ${
-              index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-            }`}
-            onClick={() => goToImage(index)}
-          />
-        ))}
-      </div>
+      {/* Image indicators disabled temporarily */}
     </section>
   )
 }
