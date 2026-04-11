@@ -1,52 +1,79 @@
--- Villa Spa Database Schema
+-- Venice Parcley Database Schema
 -- Generated for Supabase PostgreSQL
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create custom types
-CREATE TYPE treatment_category AS ENUM ('massage', 'facial', 'body', 'packages');
+CREATE TYPE apartment_category AS ENUM ('artistic_studio', 'design_loft', 'creative_suite', 'artist_residence');
+CREATE TYPE transport_category AS ENUM ('cars', 'taxis', 'chauffeurs', 'airport_transfers');
 CREATE TYPE booking_status AS ENUM ('confirmed', 'cancelled', 'completed');
+CREATE TYPE booking_type AS ENUM ('apartment', 'transportation');
 CREATE TYPE loyalty_point_type AS ENUM ('earned', 'redeemed');
 CREATE TYPE user_role AS ENUM ('guest', 'member', 'admin');
 
--- Treatments table
-CREATE TABLE treatments (
+-- Luxury Artistic Apartments table (PRIMARY)
+CREATE TABLE apartments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   slug TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
-  category treatment_category NOT NULL,
+  category apartment_category NOT NULL,
   description TEXT NOT NULL,
-  duration_minutes INTEGER NOT NULL CHECK (duration_minutes > 0),
-  price_cents INTEGER NOT NULL CHECK (price_cents >= 0),
+  short_description TEXT,
+  max_guests INTEGER NOT NULL CHECK (max_guests > 0),
+  bedrooms INTEGER NOT NULL CHECK (bedrooms >= 0),
+  bathrooms DECIMAL(3,1) NOT NULL CHECK (bathrooms > 0),
+  size_sqm INTEGER NOT NULL CHECK (size_sqm > 0),
+  base_price_cents INTEGER NOT NULL CHECK (base_price_cents >= 0),
   image_url TEXT,
+  gallery_images TEXT[] DEFAULT '{}',
+  artistic_features TEXT[] DEFAULT '{}',
+  amenities TEXT[] DEFAULT '{}',
+  location_details JSONB,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Therapists table
-CREATE TABLE therapists (
+-- Transportation services table (SECONDARY)
+CREATE TABLE transportation_services (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slug TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  category transport_category NOT NULL,
+  description TEXT NOT NULL,
+  capacity INTEGER NOT NULL CHECK (capacity > 0),
+  price_cents INTEGER NOT NULL CHECK (price_cents >= 0),
+  image_url TEXT,
+  features TEXT[] DEFAULT '{}',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Drivers table
+CREATE TABLE drivers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   bio TEXT,
   image_url TEXT,
   specialties TEXT[] DEFAULT '{}',
+  license_number TEXT,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Treatment-Therapist many-to-many relationship
-CREATE TABLE treatment_therapists (
-  treatment_id UUID REFERENCES treatments(id) ON DELETE CASCADE,
-  therapist_id UUID REFERENCES therapists(id) ON DELETE CASCADE,
-  PRIMARY KEY (treatment_id, therapist_id)
+-- Service-Driver many-to-many relationship
+CREATE TABLE service_drivers (
+  service_id UUID REFERENCES transportation_services(id) ON DELETE CASCADE,
+  driver_id UUID REFERENCES drivers(id) ON DELETE CASCADE,
+  PRIMARY KEY (service_id, driver_id)
 );
 
 -- Availability slots table
 CREATE TABLE availability_slots (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  therapist_id UUID REFERENCES therapists(id) ON DELETE CASCADE,
+  driver_id UUID REFERENCES drivers(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
@@ -56,27 +83,46 @@ CREATE TABLE availability_slots (
   CONSTRAINT valid_time_range CHECK (end_time > start_time)
 );
 
--- Bookings table
+-- Bookings table (supports both apartments and transportation)
 CREATE TABLE bookings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  booking_type booking_type NOT NULL,
   guest_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   guest_name TEXT NOT NULL,
   guest_email TEXT NOT NULL,
   guest_phone TEXT,
-  treatment_id UUID REFERENCES treatments(id) ON DELETE CASCADE,
-  therapist_id UUID REFERENCES therapists(id) ON DELETE CASCADE,
+
+  -- Apartment booking fields
+  apartment_id UUID REFERENCES apartments(id) ON DELETE CASCADE,
+  check_in_date DATE,
+  check_out_date DATE,
+  num_guests INTEGER CHECK (num_guests > 0),
+
+  -- Transportation booking fields
+  service_id UUID REFERENCES transportation_services(id) ON DELETE CASCADE,
+  driver_id UUID REFERENCES drivers(id) ON DELETE CASCADE,
   slot_id UUID REFERENCES availability_slots(id) ON DELETE CASCADE,
-  date DATE NOT NULL,
-  start_time TIME NOT NULL,
-  end_time TIME NOT NULL,
+  booking_date DATE,
+  start_time TIME,
+  end_time TIME,
+
+  -- Common fields
   status booking_status DEFAULT 'confirmed',
   total_cents INTEGER NOT NULL CHECK (total_cents >= 0),
   loyalty_points INTEGER DEFAULT 0 CHECK (loyalty_points >= 0),
   special_requests TEXT,
+  concierge_notes TEXT,
   cancellation_reason TEXT,
   cancelled_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
+  updated_at TIMESTAMPTZ DEFAULT now(),
+
+  -- Constraints
+  CONSTRAINT valid_apartment_booking CHECK (
+    (booking_type = 'apartment' AND apartment_id IS NOT NULL AND check_in_date IS NOT NULL AND check_out_date IS NOT NULL) OR
+    (booking_type = 'transportation' AND service_id IS NOT NULL AND booking_date IS NOT NULL AND start_time IS NOT NULL)
+  ),
+  CONSTRAINT valid_date_range CHECK (check_out_date > check_in_date OR check_out_date IS NULL)
 );
 
 -- Loyalty points table
@@ -97,7 +143,7 @@ CREATE TABLE profiles (
   full_name TEXT,
   phone TEXT,
   role user_role DEFAULT 'guest',
-  preferred_therapist_id UUID REFERENCES therapists(id),
+  preferred_driver_id UUID REFERENCES drivers(id),
   notification_preferences JSONB DEFAULT '{"email": true, "sms": false}',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
@@ -242,30 +288,35 @@ CREATE TRIGGER on_booking_confirmed
 
 -- Sample data for development
 
--- Insert sample treatments
-INSERT INTO treatments (slug, name, category, description, duration_minutes, price_cents, image_url) VALUES
-('swedish-massage', 'Swedish Massage', 'massage', 'A classic relaxation massage using gentle, flowing strokes to ease muscle tension and promote deep relaxation.', 60, 12000, 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400'),
-('deep-tissue-massage', 'Deep Tissue Massage', 'massage', 'Focused massage targeting chronic muscle tension and knots with firm pressure to release tight muscles.', 75, 14000, 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'),
-('aromatherapy-facial', 'Aromatherapy Facial', 'facial', 'Rejuvenating facial treatment with essential oils, cleansing, exfoliation, and moisturizing for radiant skin.', 60, 10000, 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=400'),
-('hot-stone-massage', 'Hot Stone Massage', 'massage', 'Therapeutic massage using heated stones to melt away tension and promote deep relaxation.', 90, 16000, 'https://images.unsplash.com/photo-1596170379749-0e5b96a5d9c8?w=400'),
-('body-scrub', 'Luxury Body Scrub', 'body', 'Exfoliating treatment with natural sea salts and essential oils to smooth and rejuvenate the skin.', 45, 8000, 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400'),
-('relaxation-package', 'Ultimate Relaxation Package', 'packages', 'Full day of pampering including massage, facial, and body treatment for complete rejuvenation.', 180, 28000, 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400');
+-- Insert sample luxury artistic apartments
+INSERT INTO apartments (slug, name, category, description, short_description, max_guests, bedrooms, bathrooms, size_sqm, base_price_cents, image_url, gallery_images, artistic_features, amenities, location_details) VALUES
+('minimalist-studio', 'Minimalist Canvas Studio', 'artistic_studio', 'A serene white canvas apartment featuring floor-to-ceiling windows and minimalist Scandinavian design. Perfect for artists seeking pure creative inspiration with natural light and clean lines.', 'Serene minimalist studio with Scandinavian design and natural light', 2, 0, 1.0, 45, 25000, 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400', ARRAY['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800', 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800'], ARRAY['Floor-to-ceiling windows', 'Natural light optimization', 'Scandinavian minimalist design', 'Artist workspace'], ARRAY['WiFi', 'Coffee machine', 'Art supplies', 'Natural lighting', 'Workspace desk'], '{"address": "Downtown Art District", "coordinates": {"lat": 1.3521, "lng": 103.8198}}'),
+('bohemian-loft', 'Bohemian Artist Loft', 'design_loft', 'Vibrant bohemian loft with exposed brick walls, eclectic art collections, and creative nooks. Features vintage furniture, colorful textiles, and artistic installations throughout.', 'Vibrant bohemian loft with eclectic art and creative spaces', 4, 1, 1.5, 85, 45000, 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400', ARRAY['https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800', 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800'], ARRAY['Exposed brick walls', 'Eclectic art collection', 'Vintage furniture', 'Colorful textiles', 'Artistic installations'], ARRAY['WiFi', 'Sound system', 'Art supplies', 'Reading nook', 'Creative workspace'], '{"address": "Arts Quarter", "coordinates": {"lat": 1.2994, "lng": 103.8458}}'),
+('industrial-creative-suite', 'Industrial Creative Suite', 'creative_suite', 'Converted industrial space with high ceilings, concrete walls, and modern art installations. Includes dedicated art studio space and urban design elements.', 'Industrial space converted to creative suite with art studio', 3, 1, 2.0, 120, 65000, 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400', ARRAY['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800', 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800'], ARRAY['High industrial ceilings', 'Concrete walls', 'Modern art installations', 'Dedicated art studio', 'Urban design elements'], ARRAY['WiFi', 'Sound system', 'Art supplies', 'Kitchenette', 'Storage space'], '{"address": "Industrial Arts District", "coordinates": {"lat": 1.2789, "lng": 103.8412}}'),
+('artist-residence-penthouse', 'Artist Residence Penthouse', 'artist_residence', 'Luxurious penthouse apartment designed for artists with panoramic city views, private rooftop terrace, and professional-grade art studio with natural northern light.', 'Luxurious penthouse with panoramic views and professional art studio', 2, 2, 2.5, 180, 95000, 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400', ARRAY['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800', 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800'], ARRAY['Panoramic city views', 'Private rooftop terrace', 'Professional art studio', 'Natural northern light', 'Premium finishes'], ARRAY['WiFi', 'Sound system', 'Art supplies', 'Terrace access', 'Premium appliances'], '{"address": "Luxury Arts Tower", "coordinates": {"lat": 1.2834, "lng": 103.8607}}');
 
--- Insert sample therapists
-INSERT INTO therapists (name, bio, specialties, image_url) VALUES
-('Sarah Johnson', 'Certified massage therapist with 8 years of experience specializing in relaxation techniques.', ARRAY['Swedish Massage', 'Deep Tissue'], 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400'),
-('Emma Chen', 'Licensed esthetician and aromatherapist with expertise in natural skincare treatments.', ARRAY['Facials', 'Aromatherapy'], 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400'),
-('Michael Rodriguez', 'Experienced therapist specializing in sports massage and therapeutic treatments.', ARRAY['Deep Tissue', 'Sports Massage'], 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400');
+-- Insert sample transportation services (supporting services)
+INSERT INTO transportation_services (slug, name, category, description, capacity, price_cents, image_url, features) VALUES
+('luxury-sedan', 'Luxury Sedan', 'cars', 'Premium sedan with leather interior, perfect for business travel or special occasions.', 4, 25000, 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400', ARRAY['Leather Seats', 'WiFi', 'Refreshments', 'Professional Driver']),
+('executive-suv', 'Executive SUV', 'cars', 'Spacious SUV ideal for families or groups needing extra luggage space.', 7, 35000, 'https://images.unsplash.com/photo-1549399735-cef2e2c3f638?w=400', ARRAY['Extra Space', 'Premium Audio', 'Tinted Windows', 'GPS Navigation']),
+('premium-taxi', 'Premium Taxi', 'taxis', 'Comfortable taxi service with modern vehicles and experienced drivers.', 4, 15000, 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400', ARRAY['Metered Rates', 'Credit Card', 'Air Conditioning', 'Local Knowledge']),
+('private-chauffeur', 'Private Chauffeur', 'chauffeurs', 'Personal chauffeur service with luxury vehicle and dedicated professional driver.', 4, 45000, 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400', ARRAY['Dedicated Driver', 'Luxury Vehicle', '24/7 Service', 'Flexible Scheduling']),
+('airport-transfer', 'Airport Transfer', 'airport_transfers', 'Reliable airport transfer service with flight tracking and meet & greet.', 4, 30000, 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400', ARRAY['Flight Tracking', 'Meet & Greet', 'Luggage Assistance', 'On-time Guarantee']);
 
--- Link treatments to therapists
-INSERT INTO treatment_therapists (treatment_id, therapist_id)
-SELECT t.id, th.id FROM treatments t, therapists th
-WHERE (t.slug = 'swedish-massage' AND th.name = 'Sarah Johnson')
-   OR (t.slug = 'deep-tissue-massage' AND th.name IN ('Sarah Johnson', 'Michael Rodriguez'))
-   OR (t.slug = 'aromatherapy-facial' AND th.name = 'Emma Chen')
-   OR (t.slug = 'hot-stone-massage' AND th.name = 'Sarah Johnson')
-   OR (t.slug = 'body-scrub' AND th.name = 'Emma Chen')
-   OR (t.slug IN ('relaxation-package', 'swedish-massage', 'aromatherapy-facial', 'body-scrub') AND th.name IN ('Sarah Johnson', 'Emma Chen'));
+-- Insert sample drivers
+INSERT INTO drivers (name, bio, specialties, license_number, image_url) VALUES
+('Marcus Chen', 'Professional chauffeur with 10 years experience driving luxury vehicles and VIP clients.', ARRAY['Luxury Cars', 'Airport Transfers', 'Executive Transport'], 'DL123456789', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'),
+('Sarah Williams', 'Experienced driver specializing in safe and comfortable transportation for families and business travelers.', ARRAY['SUV Transport', 'Family Travel', 'Business Transport'], 'DL987654321', 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400'),
+('David Rodriguez', 'Certified chauffeur with expertise in airport transfers and long-distance travel.', ARRAY['Airport Transfers', 'Long Distance', 'VIP Service'], 'DL456789123', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400');
+
+-- Link services to drivers
+INSERT INTO service_drivers (service_id, driver_id)
+SELECT s.id, d.id FROM transportation_services s, drivers d
+WHERE (s.slug = 'luxury-sedan' AND d.name = 'Marcus Chen')
+   OR (s.slug = 'executive-suv' AND d.name = 'Sarah Williams')
+   OR (s.slug = 'premium-taxi' AND d.name IN ('Marcus Chen', 'David Rodriguez'))
+   OR (s.slug = 'private-chauffeur' AND d.name = 'Marcus Chen')
+   OR (s.slug = 'airport-transfer' AND d.name = 'David Rodriguez');
 
 -- Insert sample availability slots (next 30 days)
 INSERT INTO availability_slots (therapist_id, date, start_time, end_time)
