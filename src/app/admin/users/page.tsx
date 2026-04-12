@@ -10,8 +10,8 @@ import type { Database } from '@/types/database'
 type UserProfile = Database['public']['Tables']['user_profiles']['Row']
 
 export default async function UsersManagement() {
-  // Only administrators can access this page
-  await requireRole('administrator')
+  // Admins and administrators can access this page
+  await requireRole(['admin', 'administrator'])
 
   const supabase = createServerSupabaseClient()
 
