@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Josefin_Sans, Montserrat, Bebas_Neue, Mulish, Yellowtail } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { RouteShell } from "@/components/layout/route-shell";
 
 // Custom Typography Fonts
 const josefinSans = Josefin_Sans({
@@ -45,29 +44,15 @@ export const metadata: Metadata = {
   description: "Discover unique artistic apartments in Venice. Luxury accommodations designed for art lovers, creative souls, and discerning travelers.",
 };
 
-import { headers } from 'next/headers'
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = await headers()
-  const pathname = headersList.get('x-next-pathname') || ''
-  const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/login') || pathname.startsWith('/register')
-
   return (
     <html lang="en" className={`${josefinSans.variable} ${montserrat.variable} ${bebasNeue.variable} ${mulish.variable} ${yellowtail.variable}`}>
-      <body className={`${mulish.className} antialiased min-h-screen ${!isAdminRoute ? 'flex flex-col font-body' : ''}`}>
-        {!isAdminRoute && <Header />}
-        {!isAdminRoute ? (
-          <main className="flex-1">
-            {children}
-          </main>
-        ) : (
-          children
-        )}
-        {!isAdminRoute && <Footer />}
+      <body className={`${mulish.className} antialiased min-h-screen flex flex-col font-body`}>
+        <RouteShell>{children}</RouteShell>
       </body>
     </html>
   );

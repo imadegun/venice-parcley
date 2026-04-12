@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,12 +26,12 @@ export default function LoginPage({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md border-slate-200 shadow-lg">
+        <CardHeader className="space-y-1 pb-2">
+          <CardTitle className="text-2xl font-semibold text-center text-slate-900">Admin Login</CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access your account
+            Enter your credentials to access the dashboard
           </CardDescription>
         </CardHeader>
 
@@ -99,40 +98,6 @@ export default function LoginPage({
               )}
             </Button>
           </form>
-
-          <div className="mt-6 text-center space-y-2">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link href="/register" className="text-purple-600 hover:text-purple-500 font-medium">
-                Sign up
-              </Link>
-            </p>
-            <p className="text-sm">
-              <Link href="/forgot-password" className="text-purple-600 hover:text-purple-500">
-                Forgot your password?
-              </Link>
-            </p>
-          </div>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue as guest</span>
-              </div>
-            </div>
-
-            <Button
-              variant="outline"
-              className="w-full mt-4"
-              onClick={() => router.push('/treatments')}
-              disabled={isLoading}
-            >
-              Browse Treatments
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>
