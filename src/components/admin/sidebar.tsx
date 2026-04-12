@@ -22,6 +22,16 @@ const adminNavItems = [
     icon: Home
   },
   {
+    title: 'Apartments',
+    href: '/admin/apartments',
+    icon: Home
+  },
+  {
+    title: 'Bookings',
+    href: '/admin/bookings',
+    icon: Calendar
+  },
+  {
     title: 'Gallery',
     href: '/admin/gallery',
     icon: Image
@@ -30,6 +40,16 @@ const adminNavItems = [
     title: 'Content',
     href: '/admin/content',
     icon: FileText
+  },
+  {
+    title: 'Transportation',
+    href: '/admin/transportation',
+    icon: Calendar
+  },
+  {
+    title: 'Drivers',
+    href: '/admin/drivers',
+    icon: Users
   },
   {
     title: 'Users',

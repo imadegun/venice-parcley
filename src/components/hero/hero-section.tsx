@@ -5,12 +5,16 @@ import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
-import { getHeroContent } from '@/lib/content'
+import { getHeroContent, type HeroContent } from '@/lib/content'
 
-export function HeroSection() {
+interface HeroSectionProps {
+  heroContentData?: HeroContent
+}
+
+export function HeroSection({ heroContentData }: HeroSectionProps) {
   const { t, i18n } = useTranslation()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const heroContent = getHeroContent()
+  const heroContent = heroContentData ?? getHeroContent()
 
   const currentLang = i18n.language as 'en' | 'it'
 

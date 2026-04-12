@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase'
+import { createServerAuthClient } from '@/lib/supabase-server'
 import type { Database } from '@/types/database'
 
-type UserRole = 'user' | 'admin' | 'administrator'
+type UserRole = 'guest' | 'member' | 'admin' | 'administrator'
 
 export async function requireAuth() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerAuthClient()
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) {
@@ -15,7 +16,7 @@ export async function requireAuth() {
   return user
 }
 
-export async function requireRole(requiredRoles: UserRole[] | UserRole = 'user') {
+export async function requireRole(requiredRoles: UserRole[] | UserRole = 'guest') {
   const user = await requireAuth()
   const userRole = await getUserRole(user.id)
 
@@ -24,41 +25,36 @@ export async function requireRole(requiredRoles: UserRole[] | UserRole = 'user')
 
   // Check if user has required role
   if (!roleArray.includes(userRole)) {
-    // Redirect based on user's actual role
-    if (userRole === 'user') {
-      redirect('/')
-    } else {
-      redirect('/admin')
-    }
+    // Redirect non-users to homepage, not back to admin
+    redirect('/')
   }
 
   return user
 }
 
 export async function getCurrentUser() {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerAuthClient()
   const { data: { user } } = await supabase.auth.getUser()
   return user
 }
 
 export async function getUserRole(userId: string): Promise<UserRole> {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerAuthClient()
 
   try {
     const { data: profile, error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('role')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single()
 
     if (error || !profile) {
-      // Default to 'user' role if profile doesn't exist
-      return 'user'
+      return 'guest'
     }
 
     return profile.role as UserRole
   } catch {
-    return 'user'
+    return 'guest'
   }
 }
 
@@ -66,9 +62,9 @@ export async function getUserProfile(userId: string) {
   const supabase = createServerSupabaseClient()
 
   const { data: profile, error } = await supabase
-    .from('user_profiles')
+    .from('profiles')
     .select('*')
-    .eq('user_id', userId)
+    .eq('id', userId)
     .single()
 
   if (error) {
@@ -82,12 +78,12 @@ export async function updateUserRole(userId: string, role: UserRole) {
   const supabase = createServerSupabaseClient()
 
   const { error } = await supabase
-    .from('user_profiles')
-    .upsert({
-      user_id: userId,
+    .from('profiles')
+    .update({
       role: role,
       updated_at: new Date().toISOString()
     })
+    .eq('id', userId)
 
   if (error) {
     throw new Error('Failed to update user role')
@@ -98,12 +94,11 @@ export async function createUserProfile(userId: string, fullName: string, role: 
   const supabase = createServerSupabaseClient()
 
   const { error } = await supabase
-    .from('user_profiles')
+    .from('profiles')
     .insert({
-      user_id: userId,
+      id: userId,
       full_name: fullName,
-      role: role,
-      preferences: {}
+      role: role
     })
 
   if (error) {

@@ -56,6 +56,18 @@ export interface PropertyType {
   }
 }
 
+export interface HomepageContent {
+  hero: HeroContent
+  featured: {
+    title: string
+    description: string
+  }
+  about: {
+    title: string
+    content: string
+  }
+}
+
 // Website Content Database
 export const websiteContent = {
   hero: {
@@ -233,6 +245,20 @@ export const websiteContent = {
   ] as PropertyType[]
 }
 
+export const defaultHomepageContent: HomepageContent = {
+  hero: websiteContent.hero,
+  featured: {
+    title: 'Featured Apartments',
+    description:
+      'Experience Venice like never before in our carefully curated collection of artistic apartments.'
+  },
+  about: {
+    title: 'About Venice Parcley',
+    content:
+      'We connect art lovers with extraordinary living spaces in Venice, offering a unique blend of luxury accommodation and artistic inspiration.'
+  }
+}
+
 // Content Management Functions
 export function getHeroContent(): HeroContent {
   return websiteContent.hero
@@ -248,6 +274,21 @@ export function getPropertyTypes(): PropertyType[] {
 
 export function getPropertyTypeById(id: string): PropertyType | undefined {
   return websiteContent.propertyTypes.find(type => type.id === id)
+}
+
+export async function getHomepageContent(): Promise<HomepageContent> {
+  try {
+    const { getPublishedContentSection } = await import('@/lib/content-service')
+    const section = await getPublishedContentSection('homepage')
+
+    if (section?.payload && typeof section.payload === 'object') {
+      return section.payload as HomepageContent
+    }
+  } catch {
+    // Fallback to default content when DB is unavailable
+  }
+
+  return defaultHomepageContent
 }
 
 // In a real CMS, these would update a database

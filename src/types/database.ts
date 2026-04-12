@@ -212,6 +212,70 @@ export interface Database {
           role?: 'user' | 'admin' | 'administrator'
         }
       }
+      content_sections: {
+        Row: {
+          id: string
+          key: 'homepage' | 'about' | 'contact'
+          payload: Json
+          status: 'draft' | 'published'
+          version: number
+          created_by?: string
+          updated_by?: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          key: 'homepage' | 'about' | 'contact'
+          payload: Json
+          status?: 'draft' | 'published'
+          version?: number
+          created_by?: string
+          updated_by?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          key?: 'homepage' | 'about' | 'contact'
+          payload?: Json
+          status?: 'draft' | 'published'
+          version?: number
+          created_by?: string
+          updated_by?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      content_revisions: {
+        Row: {
+          id: string
+          section_id: string
+          key: 'homepage' | 'about' | 'contact'
+          payload: Json
+          version: number
+          published_by?: string
+          published_at: string
+        }
+        Insert: {
+          id?: string
+          section_id: string
+          key: 'homepage' | 'about' | 'contact'
+          payload: Json
+          version: number
+          published_by?: string
+          published_at?: string
+        }
+        Update: {
+          id?: string
+          section_id?: string
+          key?: 'homepage' | 'about' | 'contact'
+          payload?: Json
+          version?: number
+          published_by?: string
+          published_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

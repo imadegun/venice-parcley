@@ -150,13 +150,13 @@ CREATE TABLE profiles (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_treatments_category ON treatments(category);
-CREATE INDEX idx_treatments_active ON treatments(is_active);
-CREATE INDEX idx_therapists_active ON therapists(is_active);
-CREATE INDEX idx_slots_therapist_date ON availability_slots(therapist_id, date);
+CREATE INDEX idx_transportation_services_category ON transportation_services(category);
+CREATE INDEX idx_transportation_services_active ON transportation_services(is_active);
+CREATE INDEX idx_drivers_active ON drivers(is_active);
+CREATE INDEX idx_slots_driver_date ON availability_slots(driver_id, date);
 CREATE INDEX idx_slots_booked ON availability_slots(is_booked);
 CREATE INDEX idx_bookings_guest ON bookings(guest_id);
-CREATE INDEX idx_bookings_date ON bookings(date);
+CREATE INDEX idx_bookings_transport_date ON bookings(booking_date);
 CREATE INDEX idx_bookings_status ON bookings(status);
 CREATE INDEX idx_bookings_email ON bookings(guest_email);
 CREATE INDEX idx_loyalty_user ON loyalty_points(user_id);
@@ -165,24 +165,29 @@ CREATE INDEX idx_profiles_email ON profiles(email);
 -- Row Level Security (RLS) Policies
 
 -- Enable RLS on all tables
-ALTER TABLE treatments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE therapists ENABLE ROW LEVEL SECURITY;
-ALTER TABLE treatment_therapists ENABLE ROW LEVEL SECURITY;
+ALTER TABLE apartments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transportation_services ENABLE ROW LEVEL SECURITY;
+ALTER TABLE drivers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_drivers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE availability_slots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loyalty_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Treatments: Public read access
-CREATE POLICY "Treatments are viewable by everyone" ON treatments
+-- Apartments: Public read access
+CREATE POLICY "Apartments are viewable by everyone" ON apartments
   FOR SELECT USING (is_active = true);
 
--- Therapists: Public read access
-CREATE POLICY "Therapists are viewable by everyone" ON therapists
+-- Transportation services: Public read access
+CREATE POLICY "Transportation services are viewable by everyone" ON transportation_services
   FOR SELECT USING (is_active = true);
 
--- Treatment-Therapists: Public read access
-CREATE POLICY "Treatment therapists are viewable by everyone" ON treatment_therapists
+-- Drivers: Public read access
+CREATE POLICY "Drivers are viewable by everyone" ON drivers
+  FOR SELECT USING (is_active = true);
+
+-- Service-Drivers mapping: Public read access
+CREATE POLICY "Service drivers are viewable by everyone" ON service_drivers
   FOR SELECT USING (true);
 
 -- Availability slots: Public read access
@@ -236,7 +241,10 @@ END;
 $$ language 'plpgsql';
 
 -- Add updated_at triggers
-CREATE TRIGGER update_treatments_updated_at BEFORE UPDATE ON treatments
+CREATE TRIGGER update_apartments_updated_at BEFORE UPDATE ON apartments
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_transportation_services_updated_at BEFORE UPDATE ON transportation_services
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_bookings_updated_at BEFORE UPDATE ON bookings
@@ -286,6 +294,62 @@ CREATE TRIGGER on_booking_confirmed
   WHEN (OLD.status != 'confirmed' AND NEW.status = 'confirmed')
   EXECUTE FUNCTION award_loyalty_points();
 
+-- Content management tables
+CREATE TABLE IF NOT EXISTS content_sections (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  key TEXT NOT NULL UNIQUE CHECK (key IN ('homepage', 'about', 'contact')),
+  payload JSONB NOT NULL,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
+  created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  updated_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS content_revisions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  section_id UUID NOT NULL REFERENCES content_sections(id) ON DELETE CASCADE,
+  key TEXT NOT NULL CHECK (key IN ('homepage', 'about', 'contact')),
+  payload JSONB NOT NULL,
+  version INTEGER NOT NULL CHECK (version > 0),
+  published_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  published_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_content_sections_key_status ON content_sections(key, status);
+CREATE INDEX IF NOT EXISTS idx_content_revisions_section ON content_revisions(section_id, version DESC);
+
+ALTER TABLE content_sections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE content_revisions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Published content is viewable by everyone" ON content_sections
+  FOR SELECT USING (status = 'published');
+
+CREATE POLICY "Admins can manage content sections" ON content_sections
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  ) WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can read revisions" ON content_revisions
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE TRIGGER update_content_sections_updated_at BEFORE UPDATE ON content_sections
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Sample data for development
 
 -- Insert sample luxury artistic apartments
@@ -319,14 +383,14 @@ WHERE (s.slug = 'luxury-sedan' AND d.name = 'Marcus Chen')
    OR (s.slug = 'airport-transfer' AND d.name = 'David Rodriguez');
 
 -- Insert sample availability slots (next 30 days)
-INSERT INTO availability_slots (therapist_id, date, start_time, end_time)
+INSERT INTO availability_slots (driver_id, date, start_time, end_time)
 SELECT
-  th.id,
+  dr.id,
   CURRENT_DATE + (n || ' days')::interval,
-  (9 + (s.slot_num * 2)) || ':00:00'::time,
-  (11 + (s.slot_num * 2)) || ':00:00'::time
-FROM therapists th
+  make_time(9 + (s.slot_num * 2), 0, 0),
+  make_time(11 + (s.slot_num * 2), 0, 0)
+FROM drivers dr
 CROSS JOIN generate_series(0, 29) n
 CROSS JOIN (SELECT generate_series(0, 2) as slot_num) s
-WHERE th.is_active = true
+WHERE dr.is_active = true
   AND EXTRACT(dow FROM CURRENT_DATE + (n || ' days')::interval) BETWEEN 1 AND 6; -- Monday to Saturday

@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button"
 import { HeroSection } from "@/components/hero/hero-section"
 import { PhotoGallery } from "@/components/gallery/photo-gallery"
 import { ArrowRight, MapPin, Users, Star } from "lucide-react"
+import { getHomepageContent } from "@/lib/content"
 
-export default function Home() {
+export default async function Home() {
+  const homepageContent = await getHomepageContent()
+
   return (
     <div className="min-h-screen pb-24 md:pb-0">
       {/* Hero Section */}
-      <HeroSection />
+      <HeroSection heroContentData={homepageContent.hero} />
 
       {/* Mobile Intro Copy */}
       <section className="py-12 bg-white">
@@ -32,9 +35,9 @@ export default function Home() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-bebas">Featured Apartments</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-bebas">{homepageContent.featured.title}</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto font-mulish">
-              Experience Venice like never before in our carefully curated collection of artistic apartments.
+              {homepageContent.featured.description}
             </p>
           </div>
 
@@ -83,9 +86,9 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-2 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 font-bebas">About Venice Parcley</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6 font-bebas">{homepageContent.about.title}</h2>
               <p className="text-lg text-gray-600 mb-6 font-mulish">
-                We connect art lovers with extraordinary living spaces in Venice, offering a unique blend of luxury accommodation and artistic inspiration.
+                {homepageContent.about.content}
               </p>
               <div className="grid gap-4 md:grid-cols-3 mb-8">
                 <div className="text-center">

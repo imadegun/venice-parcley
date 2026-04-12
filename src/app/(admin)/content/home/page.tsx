@@ -4,19 +4,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Home, Image, FileText, Save } from 'lucide-react'
+import { getContentSectionForAdmin } from '@/lib/content-service'
+import { defaultHomepageContent } from '@/lib/content'
+import { saveHomepageContent, publishHomepageContent } from './actions'
+import { Home, Image as ImageIcon, FileText, Save } from 'lucide-react'
 
 export default async function HomeContentManagement() {
   await requireRole(['admin', 'administrator'])
 
-  // Mock current content - in real app, fetch from database
-  const currentContent = {
-    heroTitle: "Discover Luxury Artistic Apartments in Venice",
-    heroSubtitle: "Unique spaces designed for art lovers, creative souls, and discerning travelers",
-    featuredDescription: "Experience Venice like never before in our carefully curated collection of artistic apartments.",
-    aboutTitle: "About Venice Parcley",
-    aboutContent: "We connect art lovers with extraordinary living spaces in Venice, offering a unique blend of luxury accommodation and artistic inspiration."
-  }
+  const section = await getContentSectionForAdmin('homepage')
+  const payload = (section?.payload as typeof defaultHomepageContent | undefined) ?? defaultHomepageContent
 
   return (
     <div className="space-y-8">
@@ -27,50 +24,98 @@ export default async function HomeContentManagement() {
             Manage the content displayed on your homepage.
           </p>
         </div>
-        <Button>
-          <Save className="mr-2 h-4 w-4" />
-          Save Changes
-        </Button>
+        <form action={publishHomepageContent}>
+          <Button type="submit" variant="outline">
+            Publish
+          </Button>
+        </form>
       </div>
 
-      <div className="grid gap-6">
+      <form action={saveHomepageContent} className="grid gap-6">
         {/* Hero Section */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Image className="h-5 w-5" />
+              <ImageIcon className="h-5 w-5" />
               Hero Section
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="heroTitle">Hero Title</Label>
+              <Label htmlFor="heroTitleEn">Hero Title (EN)</Label>
               <Input
-                id="heroTitle"
-                defaultValue={currentContent.heroTitle}
+                id="heroTitleEn"
+                name="heroTitleEn"
+                defaultValue={payload.hero.title.en}
                 className="mt-1"
               />
             </div>
 
             <div>
-              <Label htmlFor="heroSubtitle">Hero Subtitle</Label>
+              <Label htmlFor="heroTitleIt">Hero Title (IT)</Label>
+              <Input
+                id="heroTitleIt"
+                name="heroTitleIt"
+                defaultValue={payload.hero.title.it}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="heroSubtitleEn">Hero Subtitle (EN)</Label>
               <Textarea
-                id="heroSubtitle"
-                defaultValue={currentContent.heroSubtitle}
+                id="heroSubtitleEn"
+                name="heroSubtitleEn"
+                defaultValue={payload.hero.subtitle.en}
                 className="mt-1"
                 rows={2}
               />
             </div>
 
             <div>
-              <Label htmlFor="heroImage">Hero Background Image</Label>
-              <div className="mt-1 flex items-center gap-4">
-                <Button variant="outline">
-                  <Image className="mr-2 h-4 w-4" />
-                  Change Image
-                </Button>
-                <span className="text-sm text-gray-500">hero-background.jpg</span>
-              </div>
+              <Label htmlFor="heroSubtitleIt">Hero Subtitle (IT)</Label>
+              <Textarea
+                id="heroSubtitleIt"
+                name="heroSubtitleIt"
+                defaultValue={payload.hero.subtitle.it}
+                className="mt-1"
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="heroCtaEn">Hero CTA (EN)</Label>
+              <Input
+                id="heroCtaEn"
+                name="heroCtaEn"
+                defaultValue={payload.hero.ctaText.en}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="heroCtaIt">Hero CTA (IT)</Label>
+              <Input
+                id="heroCtaIt"
+                name="heroCtaIt"
+                defaultValue={payload.hero.ctaText.it}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="heroImage1">Hero Image URL 1</Label>
+              <Input id="heroImage1" name="heroImage1" defaultValue={payload.hero.backgroundImages[0] ?? ''} className="mt-1" />
+            </div>
+
+            <div>
+              <Label htmlFor="heroImage2">Hero Image URL 2</Label>
+              <Input id="heroImage2" name="heroImage2" defaultValue={payload.hero.backgroundImages[1] ?? ''} className="mt-1" />
+            </div>
+
+            <div>
+              <Label htmlFor="heroImage3">Hero Image URL 3</Label>
+              <Input id="heroImage3" name="heroImage3" defaultValue={payload.hero.backgroundImages[2] ?? ''} className="mt-1" />
             </div>
           </CardContent>
         </Card>
@@ -88,7 +133,8 @@ export default async function HomeContentManagement() {
               <Label htmlFor="featuredTitle">Section Title</Label>
               <Input
                 id="featuredTitle"
-                defaultValue="Featured Apartments"
+                name="featuredTitle"
+                defaultValue={payload.featured.title}
                 className="mt-1"
               />
             </div>
@@ -97,7 +143,8 @@ export default async function HomeContentManagement() {
               <Label htmlFor="featuredDescription">Section Description</Label>
               <Textarea
                 id="featuredDescription"
-                defaultValue={currentContent.featuredDescription}
+                name="featuredDescription"
+                defaultValue={payload.featured.description}
                 className="mt-1"
                 rows={3}
               />
@@ -118,7 +165,8 @@ export default async function HomeContentManagement() {
               <Label htmlFor="aboutTitle">About Title</Label>
               <Input
                 id="aboutTitle"
-                defaultValue={currentContent.aboutTitle}
+                name="aboutTitle"
+                defaultValue={payload.about.title}
                 className="mt-1"
               />
             </div>
@@ -127,21 +175,11 @@ export default async function HomeContentManagement() {
               <Label htmlFor="aboutContent">About Content</Label>
               <Textarea
                 id="aboutContent"
-                defaultValue={currentContent.aboutContent}
+                name="aboutContent"
+                defaultValue={payload.about.content}
                 className="mt-1"
                 rows={4}
               />
-            </div>
-
-            <div>
-              <Label htmlFor="aboutImage">About Image</Label>
-              <div className="mt-1 flex items-center gap-4">
-                <Button variant="outline">
-                  <Image className="mr-2 h-4 w-4" />
-                  Change Image
-                </Button>
-                <span className="text-sm text-gray-500">about-venice.jpg</span>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -172,7 +210,14 @@ export default async function HomeContentManagement() {
             </div>
           </CardContent>
         </Card>
-      </div>
+
+        <div className="flex justify-end">
+          <Button type="submit">
+            <Save className="mr-2 h-4 w-4" />
+            Save Changes
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }
