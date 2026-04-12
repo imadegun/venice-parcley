@@ -1,29 +1,142 @@
-import { requireRole } from '@/lib/auth'
+'use client'
+
+import { useEffect, useState } from 'react'
 import { createServerSupabaseClient } from '@/lib/supabase'
 import { createApartment, deleteApartment, updateApartment } from './actions'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { DataTable } from '@/components/admin/data-table'
+import { DynamicForm } from '@/components/admin/dynamic-form'
+import { ConfirmDialog } from '@/components/admin/confirm-dialog'
+import { MarkdownEditor } from '@/components/admin/markdown-editor'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { revalidatePath } from 'next/cache'
 
-const apartmentTypes = [
-  'artistic_studio',
-  'design_loft',
-  'creative_suite',
-  'artist_residence',
-] as const
+const apartmentCategories = [
+  { value: 'artistic_studio', label: 'Artistic Studio' },
+  { value: 'design_loft', label: 'Design Loft' },
+  { value: 'creative_suite', label: 'Creative Suite' },
+  { value: 'artist_residence', label: 'Artist Residence' },
+]
 
-export default async function AdminApartmentsPage() {
-  await requireRole(['admin', 'administrator'])
-  const supabase = createServerSupabaseClient()
-  const { data: apartments, error } = await supabase
-    .from('apartments')
-    .select('*')
-    .order('created_at', { ascending: false })
+interface Apartment {
+  id: string
+  name: string
+  slug: string
+  category: string
+  description: string
+  short_description: string
+  base_price_cents: number
+  max_guests: number
+  bedrooms: number
+  bathrooms: number
+  size_sqm: number
+  amenities: string[]
+  gallery_images: string[]
+  artistic_features: string[]
+  image_url: string
+}
 
-  if (error) {
-    throw new Error(error.message)
+export default function AdminApartmentsPage() {
+  const [apartments, setApartments] = useState<Apartment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+
+  // Form state
+  const [showForm, setShowForm] = useState(false)
+  const [editItem, setEditItem] = useState<Apartment | null>(null)
+  const [formLoading, setFormLoading] = useState(false)
+
+  // Delete confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteItem, setDeleteItem] = useState<Apartment | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
+  useEffect(() => {
+    loadApartments()
+  }, [])
+
+  async function loadApartments() {
+    setLoading(true)
+    const supabase = createServerSupabaseClient()
+    const { data } = await supabase
+      .from('apartments')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setApartments(data || [])
+    setLoading(false)
+  }
+
+  const handleAdd = () => {
+    setEditItem(null)
+    setShowForm(true)
+  }
+
+  const handleEdit = (item: Apartment) => {
+    setEditItem(item)
+    setShowForm(true)
+  }
+
+  const handleDelete = (item: Apartment) => {
+    setDeleteItem(item)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleFormSubmit = async (values: Record<string, unknown>) => {
+    setFormLoading(true)
+    try {
+      if (editItem) {
+        await updateApartment({ id: editItem.id, ...values })
+      } else {
+        await createApartment(values)
+      }
+      await loadApartments()
+      setShowForm(false)
+      setEditItem(null)
+    } finally {
+      setFormLoading(false)
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!deleteItem) return
+    setDeleteLoading(true)
+    try {
+      await deleteApartment(deleteItem.id)
+      await loadApartments()
+      setShowDeleteConfirm(false)
+      setDeleteItem(null)
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  const formFields = [
+    { name: 'slug', label: 'Slug', type: 'text' as const, required: true },
+    { name: 'name', label: 'Name', type: 'text' as const, required: true },
+    { name: 'category', label: 'Category', type: 'select' as const, options: apartmentCategories, required: true },
+    { name: 'short_description', label: 'Short Description', type: 'text' as const },
+    { name: 'description', label: 'Description', type: 'markdown' as const, required: true },
+    { name: 'base_price_cents', label: 'Base Price (cents)', type: 'number' as const, required: true },
+    { name: 'max_guests', label: 'Max Guests', type: 'number' as const, required: true },
+    { name: 'bedrooms', label: 'Bedrooms', type: 'number' as const, required: true },
+    { name: 'bathrooms', label: 'Bathrooms', type: 'number' as const, required: true },
+    { name: 'size_sqm', label: 'Size (sqm)', type: 'number' as const, required: true },
+    { name: 'amenities', label: 'Amenities (comma separated)', type: 'text' as const },
+    { name: 'gallery_images', label: 'Gallery Images (comma separated URLs)', type: 'text' as const },
+    { name: 'artistic_features', label: 'Artistic Features (comma separated)', type: 'text' as const },
+    { name: 'image_url', label: 'Main Image URL', type: 'text' as const },
+  ]
+
+  const tableColumns = [
+    { key: 'name', label: 'Name' },
+    { key: 'category', label: 'Category' },
+    { key: 'max_guests', label: 'Guests' },
+    { key: 'base_price_cents', label: 'Price', render: (item: Apartment) => `$${(item.base_price_cents / 100).toFixed(2)}` },
+    { key: 'size_sqm', label: 'Size', render: (item: Apartment) => `${item.size_sqm} m²` },
+  ]
+
+  if (loading) {
+    return <div className="p-8">Loading apartments...</div>
   }
 
   return (
@@ -33,162 +146,48 @@ export default async function AdminApartmentsPage() {
         <p className="text-gray-600">Create, update, and delete apartment inventory.</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Create Apartment</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form action={createApartment} className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
-              <select id="type" name="type" className="h-10 w-full rounded-md border px-3" required>
-                {apartmentTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea id="description" name="description" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input id="address" name="address" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
-              <Input id="city" name="city" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="country">Country</Label>
-              <Input id="country" name="country" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="price_per_night">Price / Night</Label>
-              <Input id="price_per_night" name="price_per_night" type="number" min="0" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="max_guests">Max Guests</Label>
-              <Input id="max_guests" name="max_guests" type="number" min="1" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bedrooms">Bedrooms</Label>
-              <Input id="bedrooms" name="bedrooms" type="number" min="0" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bathrooms">Bathrooms</Label>
-              <Input id="bathrooms" name="bathrooms" type="number" min="0" step="0.5" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="size_sqm">Size (sqm)</Label>
-              <Input id="size_sqm" name="size_sqm" type="number" min="1" required />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="amenities">Amenities (comma separated)</Label>
-              <Input id="amenities" name="amenities" />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="images">Images (comma separated URLs)</Label>
-              <Input id="images" name="images" />
-            </div>
-            <div className="md:col-span-2">
-              <Button type="submit">Create Apartment</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <DataTable
+        data={apartments}
+        columns={tableColumns}
+        onAdd={handleAdd}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        addButtonText="Add Apartment"
+        emptyMessage="No apartments found. Click Add Apartment to create your first one."
+        pagination={{
+          currentPage,
+          totalItems: apartments.length,
+          itemsPerPage,
+          onPageChange: setCurrentPage,
+        }}
+      />
 
-      <div className="space-y-4">
-        {apartments?.map((apt) => (
-          <Card key={apt.id}>
-            <CardHeader>
-              <CardTitle>{apt.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form action={updateApartment} className="grid gap-4 md:grid-cols-2">
-                <input type="hidden" name="id" value={apt.id} />
-                <div className="space-y-2">
-                  <Label>Name</Label>
-                  <Input name="name" defaultValue={apt.name} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Type</Label>
-                  <select
-                    name="type"
-                    defaultValue={apt.type}
-                    className="h-10 w-full rounded-md border px-3"
-                    required
-                  >
-                    {apartmentTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Description</Label>
-                  <Textarea name="description" defaultValue={apt.description} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Address</Label>
-                  <Input name="address" defaultValue={apt.address} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>City</Label>
-                  <Input name="city" defaultValue={apt.city} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Country</Label>
-                  <Input name="country" defaultValue={apt.country} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Price / Night</Label>
-                  <Input name="price_per_night" type="number" min="0" defaultValue={apt.price_per_night} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Max Guests</Label>
-                  <Input name="max_guests" type="number" min="1" defaultValue={apt.max_guests} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Bedrooms</Label>
-                  <Input name="bedrooms" type="number" min="0" defaultValue={apt.bedrooms} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Bathrooms</Label>
-                  <Input name="bathrooms" type="number" min="0" step="0.5" defaultValue={apt.bathrooms} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Size (sqm)</Label>
-                  <Input name="size_sqm" type="number" min="1" defaultValue={apt.size_sqm} required />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Amenities (comma separated)</Label>
-                  <Input name="amenities" defaultValue={apt.amenities.join(', ')} />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Images (comma separated URLs)</Label>
-                  <Input name="images" defaultValue={apt.images.join(', ')} />
-                </div>
-                <div className="md:col-span-2 flex gap-2">
-                  <Button type="submit">Update</Button>
-                </div>
-              </form>
+      <DynamicForm
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        onSubmit={handleFormSubmit}
+        fields={formFields}
+        initialValues={editItem ? {
+          ...editItem,
+          amenities: editItem.amenities?.join(', '),
+          gallery_images: editItem.gallery_images?.join(', '),
+          artistic_features: editItem.artistic_features?.join(', '),
+        } : undefined}
+        title={editItem ? 'Edit Apartment' : 'Add New Apartment'}
+        submitText={editItem ? 'Update Apartment' : 'Create Apartment'}
+        loading={formLoading}
+      />
 
-              <form action={deleteApartment}>
-                <input type="hidden" name="id" value={apt.id} />
-                <Button type="submit" variant="destructive">Delete</Button>
-              </form>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleConfirmDelete}
+        title="Delete Apartment"
+        description={`Are you sure you want to delete "${deleteItem?.name}"? This action cannot be undone.`}
+        confirmText="Delete Apartment"
+        isLoading={deleteLoading}
+        variant="destructive"
+      />
     </div>
   )
 }
