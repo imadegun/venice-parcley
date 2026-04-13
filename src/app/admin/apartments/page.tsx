@@ -1,19 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { createApartment, deleteApartment, updateApartment } from './actions'
 import { DataTable } from '@/components/admin/data-table'
 import { DynamicForm } from '@/components/admin/dynamic-form'
 import { ConfirmDialog } from '@/components/admin/confirm-dialog'
 
 
-const apartmentCategories = [
-  { value: 'artistic_studio', label: 'Artistic Studio' },
-  { value: 'design_loft', label: 'Design Loft' },
-  { value: 'creative_suite', label: 'Creative Suite' },
-  { value: 'artist_residence', label: 'Artist Residence' },
-]
 
 interface Apartment {
   id: string
@@ -55,7 +49,7 @@ export default function AdminApartmentsPage() {
 
   async function loadApartments() {
     setLoading(true)
-    const supabase = createServerSupabaseClient()
+    const supabase = createClient()
     const { data } = await supabase
       .from('apartments')
       .select('*')
@@ -111,7 +105,6 @@ export default function AdminApartmentsPage() {
   const formFields = [
     { name: 'slug', label: 'Slug', type: 'text' as const, required: true },
     { name: 'name', label: 'Name', type: 'text' as const, required: true },
-    { name: 'category', label: 'Category', type: 'select' as const, options: apartmentCategories, required: true },
     { name: 'short_description', label: 'Short Description', type: 'text' as const },
     { name: 'description', label: 'Description', type: 'markdown' as const, required: true },
     { name: 'base_price_cents', label: 'Base Price (cents)', type: 'number' as const, required: true },
@@ -127,7 +120,6 @@ export default function AdminApartmentsPage() {
 
   const tableColumns = [
     { key: 'name', label: 'Name' },
-    { key: 'category', label: 'Category' },
     { key: 'max_guests', label: 'Guests' },
     { key: 'base_price_cents', label: 'Price', render: (item: Apartment) => `$${(item.base_price_cents / 100).toFixed(2)}` },
     { key: 'size_sqm', label: 'Size', render: (item: Apartment) => `${item.size_sqm} m²` },

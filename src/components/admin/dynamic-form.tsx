@@ -45,9 +45,9 @@ export function DynamicForm({
   const [values, setValues] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
-    if (initialValues) {
-      setValues(initialValues)
-    } else {
+    if (isOpen && initialValues) {
+      setValues({...initialValues})
+    } else if (isOpen) {
       setValues({})
     }
   }, [initialValues, isOpen])
@@ -138,7 +138,7 @@ export function DynamicForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center">
             <span>{title}</span>

@@ -41,16 +41,6 @@ const adminNavItems = [
     icon: FileText
   },
   {
-    title: 'Transportation',
-    href: '/admin/transportation',
-    icon: Calendar
-  },
-  {
-    title: 'Drivers',
-    href: '/admin/drivers',
-    icon: Users
-  },
-  {
     title: 'Users',
     href: '/admin/users',
     icon: Users,

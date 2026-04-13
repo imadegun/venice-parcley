@@ -45,7 +45,6 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
     name: formData.get('name'),
     description: formData.get('description'),
     short_description: formData.get('short_description')?.toString(),
-    category: formData.get('category'),
     base_price_cents: formData.get('base_price_cents'),
     max_guests: formData.get('max_guests'),
     bedrooms: formData.get('bedrooms'),
@@ -55,7 +54,7 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
     gallery_images: formData.get('gallery_images')?.toString(),
     artistic_features: formData.get('artistic_features')?.toString(),
     image_url: formData.get('image_url')?.toString(),
-    is_active: formData.get('is_active') === 'on',
+    is_active: formData.get('is_active') === 'on' || true,
   })
 
   if (!parsed.success) {
@@ -69,7 +68,6 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
     name: payload.name,
     description: payload.description,
     short_description: payload.short_description || null,
-    category: payload.category,
     base_price_cents: payload.base_price_cents,
     max_guests: payload.max_guests,
     bedrooms: payload.bedrooms,
@@ -104,7 +102,6 @@ export async function updateApartment(data: FormData | Record<string, unknown>) 
     name: formData.get('name'),
     description: formData.get('description'),
     short_description: formData.get('short_description')?.toString(),
-    category: formData.get('category'),
     base_price_cents: formData.get('base_price_cents'),
     max_guests: formData.get('max_guests'),
     bedrooms: formData.get('bedrooms'),
@@ -114,7 +111,7 @@ export async function updateApartment(data: FormData | Record<string, unknown>) 
     gallery_images: formData.get('gallery_images')?.toString(),
     artistic_features: formData.get('artistic_features')?.toString(),
     image_url: formData.get('image_url')?.toString(),
-    is_active: formData.get('is_active') === 'on',
+    is_active: formData.get('is_active') === 'on' || true,
   })
 
   if (!parsed.success) {
@@ -130,7 +127,6 @@ export async function updateApartment(data: FormData | Record<string, unknown>) 
       name: payload.name,
       description: payload.description,
       short_description: payload.short_description || null,
-      category: payload.category,
       base_price_cents: payload.base_price_cents,
       max_guests: payload.max_guests,
       bedrooms: payload.bedrooms,
