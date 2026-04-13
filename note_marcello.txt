@@ -24,3 +24,15 @@ booking
 - tombol booking link
 - akan link ke strip lain
 - setiap aprtment punya stripe sendiri
+
+Home text
+
+Headline
+Life in the Heart of Venice.
+
+Subheadline
+Intimate stays where timeless Venetian character meets understated contemporary living elegance. Central. Private. Effortless.
+
+Apartments
+Designed for discerning travelers, each residence offers a calm and curated atmosphere, just steps from the city�s most iconic landmarks. 
+Thoughtful details, refined materials, and a sense of quiet exclusivity.
