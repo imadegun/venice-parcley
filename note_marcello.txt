@@ -1,0 +1,26 @@
+font text LOGO = Garamond
+
+Menu : 
+- About
+- Apartments
+- Neigbourhood
+- How to get here
+- Contact with map
+
+
+todo
+- menu show hide
+- content
+- color manage in header
+
+
+hapus : 
+- transportation
+- driver
+- booking
+
+
+booking 
+- tombol booking link
+- akan link ke strip lain
+- setiap aprtment punya stripe sendiri
