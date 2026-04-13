@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -118,9 +118,9 @@ export function DynamicForm({
             onValueChange={(val) => handleChange(field.name, val)}
             disabled={field.disabled}
           >
-            <SelectTrigger>
-              <SelectValue placeholder={field.placeholder || 'Select...'} />
-            </SelectTrigger>
+              <SelectTrigger>
+                <SelectValue>{field.placeholder || 'Select...'}</SelectValue>
+              </SelectTrigger>
             <SelectContent>
               {field.options?.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>

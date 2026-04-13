@@ -281,8 +281,8 @@ export async function getHomepageContent(): Promise<HomepageContent> {
     const { getPublishedContentSection } = await import('@/lib/content-service')
     const section = await getPublishedContentSection('homepage')
 
-    if (section?.payload && typeof section.payload === 'object') {
-      return section.payload as HomepageContent
+    if (section?.payload && typeof section.payload === 'object' && !Array.isArray(section.payload)) {
+      return section.payload as unknown as HomepageContent
     }
   } catch {
     // Fallback to default content when DB is unavailable

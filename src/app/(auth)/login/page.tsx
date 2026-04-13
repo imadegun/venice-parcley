@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,16 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { signIn } from './actions'
 
-export default function LoginPage({
-  searchParams,
-}: {
-  searchParams: { error?: string }
+export default function LoginPage(props: {
+  searchParams: Promise<{ error?: string }>
 }) {
+  const searchParams = React.use(props.searchParams);
+  const error = searchParams.error;
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const error = searchParams.error
 
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true)

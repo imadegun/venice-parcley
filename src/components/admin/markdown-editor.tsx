@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import { Bold, Italic, List, ListOrdered, Code, Quote, Heading, Undo, Redo, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+
 
 interface MarkdownEditorProps {
   value: string
@@ -96,40 +96,24 @@ export function MarkdownEditor({
   return (
     <div className="border rounded-lg overflow-hidden">
       <div className="flex gap-1 p-2 border-b bg-muted/30">
-        <TooltipProvider>
           {actions.map((Action, idx) => (
-            <Tooltip key={idx}>
-              <TooltipTrigger asChild>
                 <Button
+                  key={idx}
                   variant="ghost"
                   size="icon-sm"
                   onClick={Action.action}
                   disabled={Action.disabled}
                   className="h-8 w-8"
+                  title={Action.title}
                 >
                   <Action.icon className="w-4 h-4" />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{Action.title}</p>
-              </TooltipContent>
-            </Tooltip>
           ))}
           <div className="ml-auto">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-sm" className="h-8 w-8" asChild>
-                  <a href="https://commonmark.org/help/" target="_blank" rel="noopener noreferrer">
+                <a href="https://commonmark.org/help/" target="_blank" rel="noopener noreferrer" title="Markdown syntax help" className="inline-flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted transition-colors">
                     <HelpCircle className="w-4 h-4" />
-                  </a>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Markdown syntax help</p>
-              </TooltipContent>
-            </Tooltip>
+                </a>
           </div>
-        </TooltipProvider>
       </div>
       <Textarea
         ref={textareaRef}

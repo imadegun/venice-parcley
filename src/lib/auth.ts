@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase'
 import { createServerAuthClient } from '@/lib/supabase-server'
 import type { Database } from '@/types/database'
 
-type UserRole = 'guest' | 'member' | 'admin' | 'administrator'
+type UserRole = 'guest' | 'member' | 'user' | 'admin' | 'administrator'
 
 export async function requireAuth() {
   const supabase = await createServerAuthClient()
@@ -90,7 +90,7 @@ export async function updateUserRole(userId: string, role: UserRole) {
   }
 }
 
-export async function createUserProfile(userId: string, fullName: string, role: UserRole = 'user') {
+export async function createUserProfile(userId: string, fullName: string, role: UserRole = 'guest') {
   const supabase = createServerSupabaseClient()
 
   const { error } = await supabase

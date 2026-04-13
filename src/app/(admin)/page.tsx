@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+
 import { requireRole, getUserRole } from '@/lib/auth'
 import { createServerSupabaseClient } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

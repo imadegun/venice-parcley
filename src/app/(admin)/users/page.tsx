@@ -1,13 +1,13 @@
 import { requireRole } from '@/lib/auth'
 import { createServerSupabaseClient } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Users, Shield, Crown, User } from 'lucide-react'
 import type { Database } from '@/types/database'
 
-type UserProfile = Database['public']['Tables']['user_profiles']['Row']
+
 
 export default async function UsersManagement() {
   // Only administrators can access this page

@@ -1,7 +1,7 @@
 import { requireRole } from '@/lib/auth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { FileText, Home, Image, Phone, Mail } from 'lucide-react'
+import { FileText, Home, Image, Phone } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function ContentManagement() {

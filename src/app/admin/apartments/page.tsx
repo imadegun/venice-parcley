@@ -6,9 +6,7 @@ import { createApartment, deleteApartment, updateApartment } from './actions'
 import { DataTable } from '@/components/admin/data-table'
 import { DynamicForm } from '@/components/admin/dynamic-form'
 import { ConfirmDialog } from '@/components/admin/confirm-dialog'
-import { MarkdownEditor } from '@/components/admin/markdown-editor'
-import { Button } from '@/components/ui/button'
-import { revalidatePath } from 'next/cache'
+
 
 const apartmentCategories = [
   { value: 'artistic_studio', label: 'Artistic Studio' },

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 
 interface PhotoGalleryProps {
   images: string[]
@@ -68,7 +68,7 @@ export function PhotoGallery({ images, alt, className = '' }: PhotoGalleryProps)
           onClose={closeLightbox}
           onNext={nextImage}
           onPrev={prevImage}
-          onKeyDown={handleKeyDown}
+           _onKeyDown={handleKeyDown}
           alt={alt}
         />
       </div>
@@ -127,7 +127,7 @@ export function PhotoGallery({ images, alt, className = '' }: PhotoGalleryProps)
         onClose={closeLightbox}
         onNext={nextImage}
         onPrev={prevImage}
-        onKeyDown={handleKeyDown}
+           _onKeyDown={handleKeyDown}
         alt={alt}
       />
     </div>
@@ -142,7 +142,7 @@ interface LightboxProps {
   onClose: () => void
   onNext: () => void
   onPrev: () => void
-  onKeyDown: (e: KeyboardEvent) => void
+  _onKeyDown: (e: KeyboardEvent) => void
   alt: string
 }
 
@@ -153,7 +153,7 @@ function Lightbox({
   onClose,
   onNext,
   onPrev,
-  onKeyDown,
+  _onKeyDown,
   alt
 }: LightboxProps) {
   if (!isOpen) return null

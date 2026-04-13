@@ -75,7 +75,7 @@ export class BaseCRUDService<T, TInsert, TUpdate> {
   async create(data: TInsert): Promise<T> {
     const { data: result, error } = await supabase
       .from(this.tableName)
-      .insert(data)
+      .insert(data as any)
       .select()
       .single()
     
@@ -86,7 +86,7 @@ export class BaseCRUDService<T, TInsert, TUpdate> {
   async update(id: string, data: TUpdate): Promise<T> {
     const { data: result, error } = await supabase
       .from(this.tableName)
-      .update(data)
+      .update(data as any)
       .eq(this.primaryKey, id)
       .select()
       .single()
