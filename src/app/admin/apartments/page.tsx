@@ -6,6 +6,7 @@ import { createApartment, deleteApartment, updateApartment } from './actions'
 import { DataTable } from '@/components/admin/data-table'
 import { DynamicForm } from '@/components/admin/dynamic-form'
 import { ConfirmDialog } from '@/components/admin/confirm-dialog'
+import { ImageUploader } from '@/components/admin/image-uploader'
 
 
 
@@ -19,11 +20,9 @@ interface Apartment {
   base_price_cents: number
   max_guests: number
   bedrooms: number
-  bathrooms: number
   size_sqm: number
   amenities: string[]
   gallery_images: string[]
-  artistic_features: string[]
   image_url: string
 }
 
@@ -103,19 +102,17 @@ export default function AdminApartmentsPage() {
   }
 
   const formFields = [
-    { name: 'slug', label: 'Slug', type: 'text' as const, required: true },
     { name: 'name', label: 'Name', type: 'text' as const, required: true },
+    { name: 'slug', label: 'Slug (auto-generated)', type: 'text' as const, required: true, disabled: true },
     { name: 'short_description', label: 'Short Description', type: 'text' as const },
     { name: 'description', label: 'Description', type: 'markdown' as const, required: true },
     { name: 'base_price_cents', label: 'Base Price (cents)', type: 'number' as const, required: true },
     { name: 'max_guests', label: 'Max Guests', type: 'number' as const, required: true },
     { name: 'bedrooms', label: 'Bedrooms', type: 'number' as const, required: true },
-    { name: 'bathrooms', label: 'Bathrooms', type: 'number' as const, required: true },
-    { name: 'size_sqm', label: 'Size (sqm)', type: 'number' as const, required: true },
+    { name: 'policy', label: 'Policy', type: 'textarea' as const },
+    { name: 'note', label: 'Note', type: 'textarea' as const },
     { name: 'amenities', label: 'Amenities (comma separated)', type: 'text' as const },
-    { name: 'gallery_images', label: 'Gallery Images (comma separated URLs)', type: 'text' as const },
-    { name: 'artistic_features', label: 'Artistic Features (comma separated)', type: 'text' as const },
-    { name: 'image_url', label: 'Main Image URL', type: 'text' as const },
+    { name: 'unified_images', label: 'Apartment Images', type: 'unified-images' as const, required: true },
   ]
 
   const tableColumns = [
@@ -160,8 +157,10 @@ export default function AdminApartmentsPage() {
         initialValues={editItem ? {
           ...editItem,
           amenities: editItem.amenities?.join(', '),
-          gallery_images: editItem.gallery_images?.join(', '),
-          artistic_features: editItem.artistic_features?.join(', '),
+          unified_images: {
+            images: editItem.gallery_images || [],
+            mainImageIndex: editItem.gallery_images?.findIndex(img => img === editItem.image_url) || 0
+          },
         } : undefined}
         title={editItem ? 'Edit Apartment' : 'Add New Apartment'}
         submitText={editItem ? 'Update Apartment' : 'Create Apartment'}

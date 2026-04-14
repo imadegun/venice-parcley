@@ -14,12 +14,13 @@ const apartmentSchema = z.object({
   base_price_cents: z.coerce.number().int().nonnegative(),
   max_guests: z.coerce.number().int().positive(),
   bedrooms: z.coerce.number().int().nonnegative(),
-  bathrooms: z.coerce.number().nonnegative(),
-  size_sqm: z.coerce.number().int().positive(),
+  policy: z.string().optional().default(''),
+  note: z.string().optional().default(''),
   amenities: z.string().optional().default(''),
-  gallery_images: z.string().optional().default(''),
-  artistic_features: z.string().optional().default(''),
-  image_url: z.string().optional().default(''),
+  unified_images: z.object({
+    images: z.array(z.string()),
+    mainImageIndex: z.number().int().min(0)
+  }).optional().default({ images: [], mainImageIndex: 0 }),
   is_active: z.coerce.boolean().optional().default(true),
 })
 
@@ -32,9 +33,13 @@ function toStringArray(input?: string) {
 }
 
 export async function createApartment(data: FormData | Record<string, unknown>) {
-  const formData = data instanceof FormData ? data : 
+  const formData = data instanceof FormData ? data :
     Object.entries(data).reduce((fd, [key, value]) => {
-      fd.append(key, String(value ?? ''))
+      if (key === 'unified_images' && typeof value === 'object' && value !== null) {
+        fd.append(key, JSON.stringify(value))
+      } else {
+        fd.append(key, String(value ?? ''))
+      }
       return fd
     }, new FormData())
   await requireRole(['admin', 'administrator'])
@@ -48,12 +53,10 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
     base_price_cents: formData.get('base_price_cents'),
     max_guests: formData.get('max_guests'),
     bedrooms: formData.get('bedrooms'),
-    bathrooms: formData.get('bathrooms'),
-    size_sqm: formData.get('size_sqm'),
+    policy: formData.get('policy')?.toString(),
+    note: formData.get('note')?.toString(),
     amenities: formData.get('amenities')?.toString(),
-    gallery_images: formData.get('gallery_images')?.toString(),
-    artistic_features: formData.get('artistic_features')?.toString(),
-    image_url: formData.get('image_url')?.toString(),
+    unified_images: formData.get('unified_images') ? JSON.parse(formData.get('unified_images') as string) : { images: [], mainImageIndex: 0 },
     is_active: formData.get('is_active') === 'on' || true,
   })
 
@@ -71,12 +74,11 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
     base_price_cents: payload.base_price_cents,
     max_guests: payload.max_guests,
     bedrooms: payload.bedrooms,
-    bathrooms: payload.bathrooms,
-    size_sqm: payload.size_sqm,
+    policy: payload.policy || null,
+    note: payload.note || null,
     amenities: toStringArray(payload.amenities),
-    gallery_images: toStringArray(payload.gallery_images),
-    artistic_features: toStringArray(payload.artistic_features),
-    image_url: payload.image_url || null,
+    gallery_images: payload.unified_images.images,
+    image_url: payload.unified_images.images[payload.unified_images.mainImageIndex] || null,
     is_active: payload.is_active,
   })
 
@@ -86,9 +88,13 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
 }
 
 export async function updateApartment(data: FormData | Record<string, unknown>) {
-  const formData = data instanceof FormData ? data : 
+  const formData = data instanceof FormData ? data :
     Object.entries(data).reduce((fd, [key, value]) => {
-      fd.append(key, String(value ?? ''))
+      if (key === 'unified_images' && typeof value === 'object' && value !== null) {
+        fd.append(key, JSON.stringify(value))
+      } else {
+        fd.append(key, String(value ?? ''))
+      }
       return fd
     }, new FormData())
   await requireRole(['admin', 'administrator'])
@@ -105,12 +111,10 @@ export async function updateApartment(data: FormData | Record<string, unknown>) 
     base_price_cents: formData.get('base_price_cents'),
     max_guests: formData.get('max_guests'),
     bedrooms: formData.get('bedrooms'),
-    bathrooms: formData.get('bathrooms'),
-    size_sqm: formData.get('size_sqm'),
+    policy: formData.get('policy')?.toString(),
+    note: formData.get('note')?.toString(),
     amenities: formData.get('amenities')?.toString(),
-    gallery_images: formData.get('gallery_images')?.toString(),
-    artistic_features: formData.get('artistic_features')?.toString(),
-    image_url: formData.get('image_url')?.toString(),
+    unified_images: formData.get('unified_images') ? JSON.parse(formData.get('unified_images') as string) : { images: [], mainImageIndex: 0 },
     is_active: formData.get('is_active') === 'on' || true,
   })
 
@@ -130,12 +134,11 @@ export async function updateApartment(data: FormData | Record<string, unknown>) 
       base_price_cents: payload.base_price_cents,
       max_guests: payload.max_guests,
       bedrooms: payload.bedrooms,
-      bathrooms: payload.bathrooms,
-      size_sqm: payload.size_sqm,
+      policy: payload.policy || null,
+      note: payload.note || null,
       amenities: toStringArray(payload.amenities),
-      gallery_images: toStringArray(payload.gallery_images),
-      artistic_features: toStringArray(payload.artistic_features),
-      image_url: payload.image_url || null,
+      gallery_images: payload.unified_images.images,
+      image_url: payload.unified_images.images[payload.unified_images.mainImageIndex] || null,
       is_active: payload.is_active,
     })
     .eq('id', id)
