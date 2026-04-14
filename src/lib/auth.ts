@@ -39,7 +39,7 @@ export async function getCurrentUser() {
 }
 
 export async function getUserRole(userId: string): Promise<UserRole> {
-  const supabase = await createServerAuthClient()
+  const supabase = createServerSupabaseClient()
 
   try {
     const { data: profile, error } = await supabase
@@ -48,7 +48,7 @@ export async function getUserRole(userId: string): Promise<UserRole> {
       .eq('id', userId)
       .single()
 
-    if (error || !profile) {
+    if (error || !profile || !profile.role) {
       return 'guest'
     }
 

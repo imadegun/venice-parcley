@@ -10,12 +10,9 @@ const apartmentSchema = z.object({
   name: z.string().min(2),
   description: z.string().min(10),
   short_description: z.string().optional().default(''),
-  category: z.enum(['artistic_studio', 'design_loft', 'creative_suite', 'artist_residence']),
   base_price_cents: z.coerce.number().int().nonnegative(),
   max_guests: z.coerce.number().int().positive(),
   bedrooms: z.coerce.number().int().nonnegative(),
-  policy: z.string().optional().default(''),
-  note: z.string().optional().default(''),
   amenities: z.string().optional().default(''),
   unified_images: z.object({
     images: z.array(z.string()),
@@ -23,6 +20,29 @@ const apartmentSchema = z.object({
   }).optional().default({ images: [], mainImageIndex: 0 }),
   is_active: z.coerce.boolean().optional().default(true),
 })
+
+const defaultUnifiedImages = { images: [], mainImageIndex: 0 }
+
+function parseUnifiedImages(input: FormDataEntryValue | null) {
+  if (!input) return defaultUnifiedImages
+
+  try {
+    const value = typeof input === 'string' ? JSON.parse(input) : input
+    const parsed = apartmentSchema.shape.unified_images.safeParse(value)
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message || 'Invalid unified_images payload')
+    }
+    return parsed.data
+  } catch {
+    throw new Error('Invalid unified_images JSON payload')
+  }
+}
+
+function parseIsActive(input: FormDataEntryValue | null) {
+  if (input === null) return true
+  const value = input.toString().toLowerCase().trim()
+  return ['true', '1', 'on', 'yes'].includes(value)
+}
 
 function toStringArray(input?: string) {
   if (!input) return []
@@ -53,11 +73,9 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
     base_price_cents: formData.get('base_price_cents'),
     max_guests: formData.get('max_guests'),
     bedrooms: formData.get('bedrooms'),
-    policy: formData.get('policy')?.toString(),
-    note: formData.get('note')?.toString(),
     amenities: formData.get('amenities')?.toString(),
-    unified_images: formData.get('unified_images') ? JSON.parse(formData.get('unified_images') as string) : { images: [], mainImageIndex: 0 },
-    is_active: formData.get('is_active') === 'on' || true,
+    unified_images: parseUnifiedImages(formData.get('unified_images')),
+    is_active: parseIsActive(formData.get('is_active')),
   })
 
   if (!parsed.success) {
@@ -74,8 +92,6 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
     base_price_cents: payload.base_price_cents,
     max_guests: payload.max_guests,
     bedrooms: payload.bedrooms,
-    policy: payload.policy || null,
-    note: payload.note || null,
     amenities: toStringArray(payload.amenities),
     gallery_images: payload.unified_images.images,
     image_url: payload.unified_images.images[payload.unified_images.mainImageIndex] || null,
@@ -111,11 +127,9 @@ export async function updateApartment(data: FormData | Record<string, unknown>) 
     base_price_cents: formData.get('base_price_cents'),
     max_guests: formData.get('max_guests'),
     bedrooms: formData.get('bedrooms'),
-    policy: formData.get('policy')?.toString(),
-    note: formData.get('note')?.toString(),
     amenities: formData.get('amenities')?.toString(),
-    unified_images: formData.get('unified_images') ? JSON.parse(formData.get('unified_images') as string) : { images: [], mainImageIndex: 0 },
-    is_active: formData.get('is_active') === 'on' || true,
+    unified_images: parseUnifiedImages(formData.get('unified_images')),
+    is_active: parseIsActive(formData.get('is_active')),
   })
 
   if (!parsed.success) {
@@ -134,8 +148,6 @@ export async function updateApartment(data: FormData | Record<string, unknown>) 
       base_price_cents: payload.base_price_cents,
       max_guests: payload.max_guests,
       bedrooms: payload.bedrooms,
-      policy: payload.policy || null,
-      note: payload.note || null,
       amenities: toStringArray(payload.amenities),
       gallery_images: payload.unified_images.images,
       image_url: payload.unified_images.images[payload.unified_images.mainImageIndex] || null,

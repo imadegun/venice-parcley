@@ -109,8 +109,6 @@ export default function AdminApartmentsPage() {
     { name: 'base_price_cents', label: 'Base Price (cents)', type: 'number' as const, required: true },
     { name: 'max_guests', label: 'Max Guests', type: 'number' as const, required: true },
     { name: 'bedrooms', label: 'Bedrooms', type: 'number' as const, required: true },
-    { name: 'policy', label: 'Policy', type: 'textarea' as const },
-    { name: 'note', label: 'Note', type: 'textarea' as const },
     { name: 'amenities', label: 'Amenities (comma separated)', type: 'text' as const },
     { name: 'unified_images', label: 'Apartment Images', type: 'unified-images' as const, required: true },
   ]
@@ -159,7 +157,10 @@ export default function AdminApartmentsPage() {
           amenities: editItem.amenities?.join(', '),
           unified_images: {
             images: editItem.gallery_images || [],
-            mainImageIndex: editItem.gallery_images?.findIndex(img => img === editItem.image_url) || 0
+            mainImageIndex: Math.max(
+              0,
+              editItem.gallery_images?.findIndex((img) => img === editItem.image_url) ?? 0
+            )
           },
         } : undefined}
         title={editItem ? 'Edit Apartment' : 'Add New Apartment'}
