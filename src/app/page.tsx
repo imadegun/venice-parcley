@@ -1,12 +1,33 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { HeroSection } from "@/components/hero/hero-section"
 import { PhotoGallery } from "@/components/gallery/photo-gallery"
-import { ArrowRight, MapPin, Users, Star } from "lucide-react"
+import { ArrowRight, MapPin, Star, Users } from "lucide-react"
 import { getHomepageContent } from "@/lib/content"
+import { createServerSupabaseClient } from "@/lib/supabase"
+
+interface FrontendApartment {
+  id: string
+  slug: string
+  name: string
+  short_description: string | null
+  base_price_cents: number
+  max_guests: number
+  bedrooms: number
+  image_url: string | null
+  is_active: boolean
+}
 
 export default async function Home() {
   const homepageContent = await getHomepageContent()
+  const supabase = createServerSupabaseClient()
+  const { data: featuredApartments } = await supabase
+    .from('apartments')
+    .select('id, slug, name, short_description, base_price_cents, max_guests, bedrooms, image_url, is_active')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(3)
 
   return (
     <div className="min-h-screen pb-24 md:pb-0">
@@ -42,31 +63,42 @@ export default async function Home() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
-            {/* Mock apartment cards - in real app, fetch from database */}
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="h-48 bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center">
-                  <MapPin className="h-12 w-12 text-blue-400" />
+            {(featuredApartments as FrontendApartment[] | null)?.map((apartment) => (
+              <Link
+                key={apartment.id}
+                href={`/apartments/${apartment.slug}`}
+                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+              >
+                <div className="relative h-48 bg-gradient-to-br from-blue-100 to-teal-100">
+                  {apartment.image_url ? (
+                    <Image
+                      src={apartment.image_url}
+                      alt={apartment.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                      <MapPin className="h-12 w-12 text-blue-400" />
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-medium text-gray-900 mb-2">
-                    Artistic Studio {i}
-                  </h3>
+                  <h3 className="text-xl font-medium text-gray-900 mb-2">{apartment.name}</h3>
                   <p className="text-gray-600 mb-4">
-                    Venice, Italy • 2 guests • 1 bedroom
+                    {apartment.short_description || `${apartment.max_guests} guests • ${apartment.bedrooms} bedroom(s)`}
                   </p>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="text-sm text-gray-600">4.9</span>
-                    </div>
+                    <span className="text-sm text-gray-600">
+                      {apartment.max_guests} guests • {apartment.bedrooms} bedrooms
+                    </span>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900">€{120 + i * 20}</p>
+                      <p className="text-2xl font-bold text-gray-900">€{(apartment.base_price_cents / 100).toFixed(0)}</p>
                       <p className="text-sm text-gray-600">per night</p>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
