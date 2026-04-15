@@ -6,6 +6,7 @@ import { PhotoGallery } from "@/components/gallery/photo-gallery"
 import { ArrowRight, MapPin, Star, Users } from "lucide-react"
 import { getHomepageContent } from "@/lib/content"
 import { createServerSupabaseClient } from "@/lib/supabase"
+import type { HeroContent } from "@/lib/content"
 
 interface FrontendApartment {
   id: string
@@ -15,6 +16,7 @@ interface FrontendApartment {
   base_price_cents: number
   max_guests: number
   bedrooms: number
+  gallery_images: string[] | null
   image_url: string | null
   is_active: boolean
 }
@@ -24,15 +26,38 @@ export default async function Home() {
   const supabase = createServerSupabaseClient()
   const { data: featuredApartments } = await supabase
     .from('apartments')
-    .select('id, slug, name, short_description, base_price_cents, max_guests, bedrooms, image_url, is_active')
+    .select('id, slug, name, short_description, base_price_cents, max_guests, bedrooms, gallery_images, image_url, is_active')
     .eq('is_active', true)
     .order('created_at', { ascending: false })
     .limit(3)
 
+  const { data: heroApartments } = await supabase
+    .from('apartments')
+    .select('gallery_images, image_url')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+
+  const heroImages = Array.from(
+    new Set(
+      (heroApartments || []).flatMap((apartment) => {
+        const gallery = Array.isArray(apartment.gallery_images) ? apartment.gallery_images : []
+        if (gallery.length > 0) return gallery
+        return apartment.image_url ? [apartment.image_url] : []
+      }).filter(Boolean)
+    )
+  )
+
+  const heroContent: HeroContent = {
+    ...homepageContent.hero,
+    backgroundImages: heroImages.length > 0
+      ? heroImages
+      : homepageContent.hero.backgroundImages,
+  }
+
   return (
     <div className="min-h-screen pb-24 md:pb-0">
       {/* Hero Section */}
-      <HeroSection heroContentData={homepageContent.hero} />
+      <HeroSection heroContentData={heroContent} />
 
       {/* Mobile Intro Copy */}
       <section className="py-12 bg-white">

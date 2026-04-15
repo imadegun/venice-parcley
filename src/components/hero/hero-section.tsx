@@ -58,11 +58,23 @@ export function HeroSection({ heroContentData }: HeroSectionProps) {
           >
             <Image
               src={image}
+              alt={`Hero background blur ${index + 1}`}
+              fill
+              className="object-cover blur-md scale-105 opacity-50"
+              priority={index === 0}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              fetchPriority={index === 0 ? 'high' : 'auto'}
+              sizes="100vw"
+              quality={100}
+              placeholder="empty"
+            />
+            <Image
+              src={image}
               alt={`Hero background ${index + 1}`}
               fill
-              className={`object-cover ${
+              className={`object-contain p-2 md:p-4 ${
                 index === currentImageIndex
-                  ? 'hero-cinematic-loop'
+                  ? 'animate-[heroFullThenFloat_2600ms_ease-in-out] hero-cinematic-loop'
                   : ''
               }`}
               priority={index === 0}
@@ -119,6 +131,20 @@ export function HeroSection({ heroContentData }: HeroSectionProps) {
       </div>
 
       {/* Image indicators disabled temporarily */}
+
+      <style jsx>{`
+        @keyframes heroFullThenFloat {
+          0% {
+            transform: scale(1);
+          }
+          35% {
+            transform: scale(1);
+          }
+          100% {
+            transform: scale(1.035);
+          }
+        }
+      `}</style>
     </section>
   )
 }
