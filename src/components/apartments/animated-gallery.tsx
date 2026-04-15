@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react'
 
@@ -12,6 +12,17 @@ interface AnimatedGalleryProps {
 export function AnimatedGallery({ images, title }: AnimatedGalleryProps) {
   const normalizedImages = useMemo(() => images.filter(Boolean), [images])
   const [activeIndex, setActiveIndex] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+
+  useEffect(() => {
+    if (normalizedImages.length <= 1 || isPaused) return
+
+    const interval = window.setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % normalizedImages.length)
+    }, 4500)
+
+    return () => window.clearInterval(interval)
+  }, [normalizedImages.length, isPaused])
 
   if (normalizedImages.length === 0) {
     return (
@@ -33,7 +44,11 @@ export function AnimatedGallery({ images, title }: AnimatedGalleryProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <div className="relative h-[420px] md:h-[520px] w-full overflow-hidden rounded-2xl bg-slate-100 shadow-lg">
         {normalizedImages.map((image, index) => (
           <div
@@ -44,10 +59,17 @@ export function AnimatedGallery({ images, title }: AnimatedGalleryProps) {
           >
             <Image
               src={image}
+              alt={`${title} background image ${index + 1}`}
+              fill
+              className="object-cover blur-md scale-105 opacity-45"
+              priority={index === 0}
+            />
+            <Image
+              src={image}
               alt={`${title} main image ${index + 1}`}
               fill
-              className={`object-cover transition-transform duration-[2600ms] ease-in-out ${
-                index === activeIndex ? 'hero-cinematic-loop' : ''
+              className={`object-contain p-2 transition-transform duration-[2600ms] ease-in-out ${
+                index === activeIndex ? 'animate-[fullThenFloat_2600ms_ease-in-out] hero-cinematic-loop' : ''
               }`}
               priority={index === 0}
             />
@@ -84,6 +106,10 @@ export function AnimatedGallery({ images, title }: AnimatedGalleryProps) {
                 type="button"
                 key={`${image}-${index}`}
                 onClick={() => setActiveIndex(index)}
+                onMouseEnter={() => {
+                  setIsPaused(true)
+                  setActiveIndex(index)
+                }}
                 className={`group relative aspect-square overflow-hidden rounded-xl transition-all duration-300 ${
                   index === activeIndex
                     ? 'ring-2 ring-violet-500 scale-[1.02]'
@@ -103,6 +129,20 @@ export function AnimatedGallery({ images, title }: AnimatedGalleryProps) {
           </div>
         </section>
       )}
+
+      <style jsx>{`
+        @keyframes fullThenFloat {
+          0% {
+            transform: scale(1);
+          }
+          35% {
+            transform: scale(1);
+          }
+          100% {
+            transform: scale(1.04);
+          }
+        }
+      `}</style>
     </div>
   )
 }

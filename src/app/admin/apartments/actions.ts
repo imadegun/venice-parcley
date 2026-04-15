@@ -5,6 +5,8 @@ import { z } from 'zod'
 import { requireRole } from '@/lib/auth'
 import { createServerSupabaseClient } from '@/lib/supabase'
 
+const APARTMENT_IMAGES_BUCKET = 'apartment-images'
+
 const apartmentSchema = z.object({
   slug: z.string().min(2),
   name: z.string().min(2),
@@ -22,6 +24,98 @@ const apartmentSchema = z.object({
 })
 
 const defaultUnifiedImages = { images: [], mainImageIndex: 0 }
+
+function getStoragePublicMarker() {
+  return `/storage/v1/object/public/${APARTMENT_IMAGES_BUCKET}/`
+}
+
+function isApartmentStorageUrl(url: string) {
+  return url.includes(getStoragePublicMarker())
+}
+
+function getStoragePathFromPublicUrl(url: string) {
+  try {
+    const parsed = new URL(url)
+    const marker = `/object/public/${APARTMENT_IMAGES_BUCKET}/`
+    const index = parsed.pathname.indexOf(marker)
+    if (index === -1) return null
+    return decodeURIComponent(parsed.pathname.slice(index + marker.length))
+  } catch {
+    return null
+  }
+}
+
+async function uploadFileToApartmentStorage(file: File, slug: string) {
+  const supabase = createServerSupabaseClient()
+  const extension = file.name.includes('.') ? file.name.split('.').pop() : 'jpg'
+  const filePath = `apartments/${slug}/${crypto.randomUUID()}-${Date.now()}.${extension}`
+
+  const uploadOptions = {
+    upsert: false,
+    cacheControl: '31536000',
+    contentType: file.type || 'image/jpeg',
+  }
+
+  let { error: uploadError } = await supabase.storage
+    .from(APARTMENT_IMAGES_BUCKET)
+    .upload(filePath, file, uploadOptions)
+
+  if (uploadError?.message?.toLowerCase().includes('bucket not found')) {
+    const { error: createBucketError } = await supabase.storage.createBucket(APARTMENT_IMAGES_BUCKET, {
+      public: true,
+      fileSizeLimit: '10MB',
+      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'],
+    })
+
+    if (createBucketError && !createBucketError.message.toLowerCase().includes('already exists')) {
+      throw new Error(createBucketError.message)
+    }
+
+    const retry = await supabase.storage
+      .from(APARTMENT_IMAGES_BUCKET)
+      .upload(filePath, file, uploadOptions)
+
+    uploadError = retry.error
+  }
+
+  if (uploadError) throw new Error(uploadError.message)
+
+  const { data: publicData } = supabase.storage
+    .from(APARTMENT_IMAGES_BUCKET)
+    .getPublicUrl(filePath)
+
+  return publicData.publicUrl
+}
+
+async function migrateExternalImageToStorage(url: string, slug: string) {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Failed to migrate image from external URL: ${url}`)
+  }
+
+  const blob = await response.blob()
+  const extensionFromType = blob.type.split('/')[1] || 'jpg'
+  const file = new File([blob], `migrated-${Date.now()}.${extensionFromType}`, {
+    type: blob.type || 'image/jpeg',
+  })
+
+  return uploadFileToApartmentStorage(file, slug)
+}
+
+async function ensureStorageImageUrls(images: string[], slug: string) {
+  const normalizedSlug = slug || 'apartment'
+  const migrated: string[] = []
+
+  for (const url of images) {
+    if (isApartmentStorageUrl(url)) {
+      migrated.push(url)
+      continue
+    }
+    migrated.push(await migrateExternalImageToStorage(url, normalizedSlug))
+  }
+
+  return migrated
+}
 
 function parseUnifiedImages(input: FormDataEntryValue | null) {
   if (!input) return defaultUnifiedImages
@@ -83,6 +177,7 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
   }
 
   const payload = parsed.data
+  const storageImages = await ensureStorageImageUrls(payload.unified_images.images, payload.slug)
 
   const { error } = await supabase.from('apartments').insert({
     slug: payload.slug,
@@ -93,8 +188,8 @@ export async function createApartment(data: FormData | Record<string, unknown>) 
     max_guests: payload.max_guests,
     bedrooms: payload.bedrooms,
     amenities: toStringArray(payload.amenities),
-    gallery_images: payload.unified_images.images,
-    image_url: payload.unified_images.images[payload.unified_images.mainImageIndex] || null,
+    gallery_images: storageImages,
+    image_url: storageImages[payload.unified_images.mainImageIndex] || null,
     is_active: payload.is_active,
   })
 
@@ -138,6 +233,26 @@ export async function updateApartment(data: FormData | Record<string, unknown>) 
 
   const payload = parsed.data
 
+  const { data: currentApartment } = await supabase
+    .from('apartments')
+    .select('gallery_images')
+    .eq('id', id)
+    .single()
+
+  const storageImages = await ensureStorageImageUrls(payload.unified_images.images, payload.slug)
+
+  const removedImages = (currentApartment?.gallery_images || []).filter(
+    (url: string) => !storageImages.includes(url)
+  )
+
+  const removedPaths = removedImages
+    .map((url: string) => getStoragePathFromPublicUrl(url))
+    .filter((value: string | null): value is string => Boolean(value))
+
+  if (removedPaths.length > 0) {
+    await supabase.storage.from(APARTMENT_IMAGES_BUCKET).remove(removedPaths)
+  }
+
   const { error } = await supabase
     .from('apartments')
     .update({
@@ -149,8 +264,8 @@ export async function updateApartment(data: FormData | Record<string, unknown>) 
       max_guests: payload.max_guests,
       bedrooms: payload.bedrooms,
       amenities: toStringArray(payload.amenities),
-      gallery_images: payload.unified_images.images,
-      image_url: payload.unified_images.images[payload.unified_images.mainImageIndex] || null,
+      gallery_images: storageImages,
+      image_url: storageImages[payload.unified_images.mainImageIndex] || null,
       is_active: payload.is_active,
     })
     .eq('id', id)
@@ -174,8 +289,57 @@ export async function deleteApartment(data: FormData | string) {
 
   if (!id) throw new Error('Apartment id is required')
 
+  const { data: apartment } = await supabase
+    .from('apartments')
+    .select('gallery_images')
+    .eq('id', id)
+    .single()
+
+  const storagePaths = (apartment?.gallery_images || [])
+    .map((url: string) => getStoragePathFromPublicUrl(url))
+    .filter((value: string | null): value is string => Boolean(value))
+
+  if (storagePaths.length > 0) {
+    await supabase.storage.from(APARTMENT_IMAGES_BUCKET).remove(storagePaths)
+  }
+
   const { error } = await supabase.from('apartments').delete().eq('id', id)
   if (error) throw new Error(error.message)
 
   revalidatePath('/admin/apartments')
+}
+
+export async function uploadApartmentImages(formData: FormData) {
+  await requireRole(['admin', 'administrator'])
+
+  const slug = formData.get('slug')?.toString() || 'apartment'
+  const files = formData
+    .getAll('files')
+    .filter((value): value is File => value instanceof File)
+
+  if (files.length === 0) {
+    return { urls: [] as string[] }
+  }
+
+  const urls: string[] = []
+  for (const file of files) {
+    urls.push(await uploadFileToApartmentStorage(file, slug))
+  }
+
+  return { urls }
+}
+
+export async function deleteApartmentImages(urls: string[]) {
+  await requireRole(['admin', 'administrator'])
+  const supabase = createServerSupabaseClient()
+
+  const paths = urls
+    .map(getStoragePathFromPublicUrl)
+    .filter((value): value is string => Boolean(value))
+
+  if (paths.length === 0) return
+
+  const { error } = await supabase.storage.from(APARTMENT_IMAGES_BUCKET).remove(paths)
+  if (error?.message?.toLowerCase().includes('bucket not found')) return
+  if (error) throw new Error(error.message)
 }

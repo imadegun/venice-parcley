@@ -167,6 +167,7 @@ export function DynamicForm({
         return (
           <UnifiedImageManager
             value={value as { images: string[], mainImageIndex: number } || { images: [], mainImageIndex: 0 }}
+            slug={String(values.slug ?? values.name ?? '')}
             onChange={(data) => handleChange(field.name, data)}
           />
         )
