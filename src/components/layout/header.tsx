@@ -105,7 +105,7 @@ export function Header() {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed top-16 right-0 z-[150] h-screen transition-opacity duration-300 md:hidden ${
+        className={`fixed top-16 right-0 z-[150] transition-opacity duration-300 md:hidden ${
           isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -135,7 +135,7 @@ export function Header() {
 
       {/* Desktop Menu Overlay */}
       <div
-        className={`hidden md:block fixed top-25 right-0 z-[150] h-screen transition-opacity duration-300 ${
+        className={`hidden md:block fixed top-25 right-0 z-[150] transition-opacity duration-300 ${
           isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
