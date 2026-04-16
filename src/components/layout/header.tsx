@@ -4,9 +4,31 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Calendar, Menu, X } from 'lucide-react'
 
+interface MenuItem {
+  id: string
+  label: string
+  href: string
+  is_active: boolean
+  sort_order: number
+}
+
+interface ThemeSettings {
+  theme_colors: {
+    header_bg_left: string
+    header_bg_right: string
+    connector_color: string
+    footer_color: string
+  }
+  logo_settings: {
+    logo_active: boolean
+  }
+}
+
 export function Header() {
   const [hasScrolled, setHasScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+  const [themeSettings, setThemeSettings] = useState<ThemeSettings | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,8 +38,44 @@ export function Header() {
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
 
+    // Fetch menu items and settings
+    fetchMenuItems()
+    fetchThemeSettings()
+
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const fetchMenuItems = async () => {
+    try {
+      const response = await fetch('/api/admin/menu')
+      if (response.ok) {
+        const data = await response.json()
+        setMenuItems(data)
+      }
+    } catch (error) {
+      console.error('Error fetching menu items:', error)
+      // Fallback to default menu items
+      setMenuItems([
+        { id: '1', href: '/about', label: 'About', is_active: true, sort_order: 1 },
+        { id: '2', href: '/apartments', label: 'Apartments', is_active: true, sort_order: 2 },
+        { id: '3', href: '/neighbourhood', label: 'Neighbourhood', is_active: true, sort_order: 3 },
+        { id: '4', href: '/how-to-get-here', label: 'How to get here', is_active: true, sort_order: 4 },
+        { id: '5', href: '/contact', label: 'Contact with map', is_active: true, sort_order: 5 },
+      ])
+    }
+  }
+
+  const fetchThemeSettings = async () => {
+    try {
+      const response = await fetch('/api/admin/settings')
+      if (response.ok) {
+        const data = await response.json()
+        setThemeSettings(data)
+      }
+    } catch (error) {
+      console.error('Error fetching theme settings:', error)
+    }
+  }
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -27,27 +85,24 @@ export function Header() {
     setIsMenuOpen(false)
   }
 
-  const menuItems = [
-    { href: '/about', label: 'About' },
-    { href: '/apartments', label: 'Apartments' },
-    { href: '/neighbourhood', label: 'Neighbourhood' },
-    { href: '/how-to-get-here', label: 'How to get here' },
-    { href: '/contact', label: 'Contact with map' },
-  ]
-
   return (
     <>
       {/* Mobile Header */}
-      <header className="mobile-header fixed top-0 left-0 right-0 h-16 bg-[#10223f] px-5 md:hidden z-[250]">
+      <header
+        className="mobile-header fixed top-0 left-0 right-0 h-16 px-5 md:hidden z-[250]"
+        style={{ backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#10223f' }}
+      >
         <div className="flex h-full items-center justify-between">
-          <Link
-            href="/"
-            className={`flex items-center transition-all duration-300 ${
-              hasScrolled ? 'opacity-0 -translate-y-2 pointer-events-none' : 'opacity-100 translate-y-0'
-            }`}
-          >
-            <span className="text-xl font-semibold text-white font-serif tracking-wide">Venice Parcley</span>
-          </Link>
+          {themeSettings?.logo_settings?.logo_active !== false && (
+            <Link
+              href="/"
+              className={`flex items-center transition-all duration-300 ${
+                hasScrolled ? 'opacity-0 -translate-y-2 pointer-events-none' : 'opacity-100 translate-y-0'
+              }`}
+            >
+              <span className="text-xl font-semibold text-white font-serif tracking-wide">Venice Parcley</span>
+            </Link>
+          )}
 
           <button
             type="button"
@@ -67,7 +122,13 @@ export function Header() {
 
       {/* Floating Left Tab - BOOK NOW */}
       <div className="fixed top-0 left-0 z-[250]">
-        <div className="h-25 px-6 bg-sky-400 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow cursor-pointer" style={{borderRadius: '0 0 50px 0'}}>
+        <div
+          className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow cursor-pointer"
+          style={{
+            backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#0ea5e9',
+            borderRadius: '0 0 50px 0'
+          }}
+        >
           <div className="flex items-center space-x-3 font-montserrat uppercase text-base md:text-lg tracking-wider font-semibold">
             <Calendar className="w-6 h-6 md:w-7 md:h-7" />
             <span>BOOK NOW</span>
@@ -76,23 +137,28 @@ export function Header() {
       </div>
 
       {/* Transparent Center Logo */}
-      <div
-        className={`fixed top-6 left-1/2 -translate-x-1/2 z-[250] transition-all duration-300 ${
-          hasScrolled ? 'opacity-0 -translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'
-        }`}
-      >
-        <Link href="/" className="flex flex-col items-center gap-1 opacity-90 hover:opacity-100 transition-opacity">
-          <span className="text-2xl md:text-3xl font-semibold text-gray-900 font-serif tracking-wide md:tracking-wider">Venice Parcley</span>
-          <div className="h-8 w-8 bg-gradient-to-r from-blue-500 to-teal-500" />
-        </Link>
-      </div>
+      {themeSettings?.logo_settings?.logo_active !== false && (
+        <div
+          className={`fixed top-6 left-1/2 -translate-x-1/2 z-[250] transition-all duration-300 ${
+            hasScrolled ? 'opacity-0 -translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <Link href="/" className="flex flex-col items-center gap-1 opacity-90 hover:opacity-100 transition-opacity">
+            <span className="text-2xl md:text-3xl font-semibold text-gray-900 font-serif tracking-wide md:tracking-wider">Venice Parcley</span>
+            <div className="h-8 w-8 bg-gradient-to-r from-blue-500 to-teal-500" />
+          </Link>
+        </div>
+      )}
 
       {/* Floating Right Tab - MENU */}
       <div className="fixed top-0 right-0 z-[250]">
         <button
           onClick={toggleMenu}
-          className="h-25 px-6 bg-purple-500 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow cursor-pointer"
-          style={{borderRadius: '0 0 0 50px'}}
+          className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow cursor-pointer"
+          style={{
+            backgroundColor: themeSettings?.theme_colors?.header_bg_right || '#7c3aed',
+            borderRadius: '0 0 0 50px'
+          }}
           aria-label="Toggle menu"
         >
           <div className="flex items-center space-x-3 font-montserrat uppercase text-base md:text-lg tracking-wider font-semibold">

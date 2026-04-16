@@ -349,7 +349,81 @@ CREATE POLICY "Admins can read revisions" ON content_revisions
 CREATE TRIGGER update_content_sections_updated_at BEFORE UPDATE ON content_sections
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Menu items table for dynamic navigation
+CREATE TABLE menu_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  label TEXT NOT NULL,
+  href TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_menu_items_active_order ON menu_items(is_active, sort_order);
+
+ALTER TABLE menu_items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Menu items are viewable by everyone" ON menu_items
+  FOR SELECT USING (true);
+
+CREATE POLICY "Admins can manage menu items" ON menu_items
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  ) WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+CREATE TRIGGER update_menu_items_updated_at BEFORE UPDATE ON menu_items
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Settings table for theme and site configuration
+CREATE TABLE settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  key TEXT UNIQUE NOT NULL,
+  value JSONB,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Settings are viewable by everyone" ON settings
+  FOR SELECT USING (true);
+
+CREATE POLICY "Admins can manage settings" ON settings
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  ) WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
 -- Sample data for development
+
+-- Insert default menu items
+INSERT INTO menu_items (label, href, is_active, sort_order) VALUES
+('About', '/about', true, 1),
+('Apartments', '/apartments', true, 2),
+('Neighbourhood', '/neighbourhood', true, 3),
+('How to get here', '/how-to-get-here', true, 4),
+('Contact with map', '/contact', true, 5);
+
+-- Insert default settings
+INSERT INTO settings (key, value) VALUES
+('theme_colors', '{"header_bg_left": "#10223f", "header_bg_right": "#7c3aed", "connector_color": "from-sky-400 to-purple-500", "footer_color": "#10223f"}'),
+('logo_settings', '{"logo_active": true}');
 
 -- Insert sample luxury artistic apartments
 INSERT INTO apartments (slug, name, category, description, short_description, max_guests, bedrooms, bathrooms, size_sqm, base_price_cents, image_url, gallery_images, amenities, location_details) VALUES
