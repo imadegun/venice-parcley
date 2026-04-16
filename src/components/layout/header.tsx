@@ -110,19 +110,19 @@ export function Header() {
         }`}
       >
         <div
-          className={`w-80 h-full bg-purple-500/50 shadow-2xl transform transition-transform duration-300 ${
+          className={`w-80 h-auto bg-purple-500/50 shadow-2xl transform transition-transform duration-300 rounded-tl-lg ${
             isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
           {/* Menu Items */}
-          <nav className="py-8">
+          <nav className="py-4">
             <ul className="space-y-1">
               {menuItems.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     onClick={closeMenu}
-                    className="block px-6 py-3 text-lg font-medium text-white hover:text-yellow-300 hover:translate-x-2 transition-all duration-200"
+                    className="block px-6 py-2 text-lg font-medium text-white hover:text-yellow-300 hover:translate-x-2 transition-all duration-200"
                   >
                     › {item.label}
                   </Link>
@@ -140,19 +140,19 @@ export function Header() {
         }`}
       >
         <div
-          className={`w-96 h-full bg-purple-500/50 shadow-2xl transform transition-transform duration-300 ${
+          className={`w-96 h-auto bg-purple-500/50 shadow-2xl transform transition-transform duration-300 rounded-tl-lg ${
             isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
           {/* Menu Items */}
-          <nav className="py-16">
+          <nav className="py-6">
             <ul className="space-y-2">
               {menuItems.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     onClick={closeMenu}
-                    className="block px-8 py-4 text-xl font-medium text-white hover:text-yellow-300 hover:translate-x-4 transition-all duration-200"
+                    className="block px-8 py-3 text-xl font-medium text-white hover:text-yellow-300 hover:translate-x-4 transition-all duration-200"
                   >
                     › {item.label}
                   </Link>
