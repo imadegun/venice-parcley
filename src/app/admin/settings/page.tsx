@@ -11,11 +11,7 @@ interface Settings {
   theme_colors: {
     header_bg_left: string
     header_bg_right: string
-    connector_color: string
     footer_color: string
-  }
-  logo_settings: {
-    logo_active: boolean
   }
 }
 
@@ -24,11 +20,7 @@ export default function AdminSettingsPage() {
     theme_colors: {
       header_bg_left: '#10223f',
       header_bg_right: '#7c3aed',
-      connector_color: 'from-sky-400 to-purple-500',
       footer_color: '#10223f'
-    },
-    logo_settings: {
-      logo_active: true
     }
   })
   const [loading, setLoading] = useState(true)
@@ -45,8 +37,7 @@ export default function AdminSettingsPage() {
       if (response.ok) {
         const data = await response.json()
         setSettings({
-          theme_colors: data.theme_colors || settings.theme_colors,
-          logo_settings: data.logo_settings || settings.logo_settings
+          theme_colors: data.theme_colors || settings.theme_colors
         })
       }
     } catch (error) {
@@ -127,15 +118,6 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="connector_color">Connector Gradient</Label>
-              <Input
-                id="connector_color"
-                value={settings.theme_colors.connector_color}
-                onChange={(e) => updateThemeColor('connector_color', e.target.value)}
-                placeholder="from-sky-400 to-purple-500"
-              />
-            </div>
-            <div>
               <Label htmlFor="footer_color">Footer Color</Label>
               <Input
                 id="footer_color"
@@ -148,28 +130,6 @@ export default function AdminSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Logo Settings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="logo_active"
-              checked={settings.logo_settings.logo_active}
-              onChange={(e) =>
-                setSettings({
-                  ...settings,
-                  logo_settings: { logo_active: e.target.checked }
-                })
-              }
-              className="w-4 h-4"
-            />
-            <Label htmlFor="logo_active">Show Logo</Label>
-          </div>
-        </CardContent>
-      </Card>
 
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving}>

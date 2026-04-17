@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { createServerClient } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    const supabase = createClient()
+    const supabase = createServerClient()
 
     const { data, error } = await supabase
       .from('settings')
@@ -30,7 +30,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = createServerClient()
     const updates = await request.json()
 
     const results = []

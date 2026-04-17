@@ -16,11 +16,7 @@ interface ThemeSettings {
   theme_colors: {
     header_bg_left: string
     header_bg_right: string
-    connector_color: string
     footer_color: string
-  }
-  logo_settings: {
-    logo_active: boolean
   }
 }
 
@@ -93,16 +89,14 @@ export function Header() {
         style={{ backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#10223f' }}
       >
         <div className="flex h-full items-center justify-between">
-          {themeSettings?.logo_settings?.logo_active !== false && (
-            <Link
-              href="/"
-              className={`flex items-center transition-all duration-300 ${
-                hasScrolled ? 'opacity-0 -translate-y-2 pointer-events-none' : 'opacity-100 translate-y-0'
-              }`}
-            >
-              <span className="text-xl font-semibold text-white font-serif tracking-wide">Venice Parcley</span>
-            </Link>
-          )}
+          <Link
+            href="/"
+            className={`flex items-center transition-all duration-300 ${
+              hasScrolled ? 'opacity-0 -translate-y-2 pointer-events-none' : 'opacity-100 translate-y-0'
+            }`}
+          >
+            <span className="text-xl font-semibold text-white font-serif tracking-wide">Venice Parcley</span>
+          </Link>
 
           <button
             type="button"
@@ -118,14 +112,19 @@ export function Header() {
 
       <div className="hidden md:block">
       {/* Top Connector Bar */}
-      <div className="fixed top-0 left-0 right-0 z-[250] h-2 bg-gradient-to-r from-sky-400 to-purple-500 border-t-2 border-white" />
+      <div
+        className="fixed top-0 left-0 right-0 z-[250] h-2 border-t-2"
+        style={{
+          background: themeSettings ? `linear-gradient(to right, ${themeSettings.theme_colors.header_bg_left}, ${themeSettings.theme_colors.header_bg_right})` : 'linear-gradient(to right, #003049, #1b211a)'
+        }}
+      />
 
       {/* Floating Left Tab - BOOK NOW */}
       <div className="fixed top-0 left-0 z-[250]">
         <div
           className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow cursor-pointer"
           style={{
-            backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#0ea5e9',
+            backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#003049',
             borderRadius: '0 0 50px 0'
           }}
         >
@@ -137,18 +136,16 @@ export function Header() {
       </div>
 
       {/* Transparent Center Logo */}
-      {themeSettings?.logo_settings?.logo_active !== false && (
-        <div
-          className={`fixed top-6 left-1/2 -translate-x-1/2 z-[250] transition-all duration-300 ${
-            hasScrolled ? 'opacity-0 -translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'
-          }`}
-        >
-          <Link href="/" className="flex flex-col items-center gap-1 opacity-90 hover:opacity-100 transition-opacity">
-            <span className="text-2xl md:text-3xl font-semibold text-gray-900 font-serif tracking-wide md:tracking-wider">Venice Parcley</span>
-            <div className="h-8 w-8 bg-gradient-to-r from-blue-500 to-teal-500" />
-          </Link>
-        </div>
-      )}
+      <div
+        className={`fixed top-6 left-1/2 -translate-x-1/2 z-[250] transition-all duration-300 ${
+          hasScrolled ? 'opacity-0 -translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'
+        }`}
+      >
+        <Link href="/" className="flex flex-col items-center gap-1 opacity-90 hover:opacity-100 transition-opacity">
+          <span className="text-2xl md:text-3xl font-semibold text-gray-900 font-serif tracking-wide md:tracking-wider">Venice Parcley</span>
+          
+        </Link>
+      </div>
 
       {/* Floating Right Tab - MENU */}
       <div className="fixed top-0 right-0 z-[250]">
@@ -156,7 +153,7 @@ export function Header() {
           onClick={toggleMenu}
           className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow cursor-pointer"
           style={{
-            backgroundColor: themeSettings?.theme_colors?.header_bg_right || '#7c3aed',
+            backgroundColor: themeSettings?.theme_colors?.header_bg_right || '#1b211a',
             borderRadius: '0 0 0 50px'
           }}
           aria-label="Toggle menu"
@@ -171,14 +168,20 @@ export function Header() {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed top-16 right-0 z-[150] transition-opacity duration-300 md:hidden ${
+        className={`fixed top-16 left-0 right-0 bottom-0 z-[150] transition-opacity duration-300 md:hidden ${
           isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
+        onClick={closeMenu}
       >
+        {/* Menu layer */}
         <div
-          className={`w-80 h-auto bg-purple-500/50 shadow-2xl transform transition-transform duration-300 rounded-tl-lg ${
+          className={`absolute top-0 right-0 w-80 h-auto shadow-2xl transform transition-transform duration-300 rounded-tl-lg ${
             isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
+          style={{
+            backgroundColor: themeSettings ? `${themeSettings.theme_colors.header_bg_right}80` : 'rgba(168, 85, 247, 0.5)'
+          }}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Menu Items */}
           <nav className="py-4">
@@ -201,14 +204,20 @@ export function Header() {
 
       {/* Desktop Menu Overlay */}
       <div
-        className={`hidden md:block fixed top-25 right-0 z-[150] transition-opacity duration-300 ${
+        className={`hidden md:block fixed top-25 left-0 right-0 bottom-0 z-[150] transition-opacity duration-300 ${
           isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
+        onClick={closeMenu}
       >
+        {/* Menu layer */}
         <div
-          className={`w-96 h-auto bg-purple-500/50 shadow-2xl transform transition-transform duration-300 rounded-tl-lg ${
+          className={`absolute top-0 right-0 w-96 h-auto shadow-2xl transform transition-transform duration-300 rounded-tl-lg ${
             isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
+          style={{
+            backgroundColor: themeSettings ? `${themeSettings.theme_colors.header_bg_right}80` : 'rgba(168, 85, 247, 0.5)'
+          }}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Menu Items */}
           <nav className="py-6">

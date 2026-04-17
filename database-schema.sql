@@ -422,8 +422,7 @@ INSERT INTO menu_items (label, href, is_active, sort_order) VALUES
 
 -- Insert default settings
 INSERT INTO settings (key, value) VALUES
-('theme_colors', '{"header_bg_left": "#10223f", "header_bg_right": "#7c3aed", "connector_color": "from-sky-400 to-purple-500", "footer_color": "#10223f"}'),
-('logo_settings', '{"logo_active": true}');
+('theme_colors', '{"header_bg_left": "#10223f", "header_bg_right": "#7c3aed", "footer_color": "#10223f"}');
 
 -- Insert sample luxury artistic apartments
 INSERT INTO apartments (slug, name, category, description, short_description, max_guests, bedrooms, bathrooms, size_sqm, base_price_cents, image_url, gallery_images, amenities, location_details) VALUES
