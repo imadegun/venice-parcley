@@ -16,19 +16,18 @@ export interface Database {
           updated_at: string
           name: string
           description: string
-          type: 'artistic_studio' | 'design_loft' | 'creative_suite' | 'artist_residence'
-          address: string
-          city: string
-          country: string
-          price_per_night: number
+          short_description: string | null
+          category: 'artistic_studio' | 'design_loft' | 'creative_suite' | 'artist_residence'
           max_guests: number
           bedrooms: number
           bathrooms: number
           size_sqm: number
+          base_price_cents: number
+          image_url: string | null
+          gallery_images: string[]
           amenities: string[]
-          images: string[]
-          is_available: boolean
-          owner_id: string
+          location_details: Json | null
+          is_active: boolean
         }
         Insert: {
           id?: string
@@ -36,19 +35,18 @@ export interface Database {
           updated_at?: string
           name: string
           description: string
-          type: 'artistic_studio' | 'design_loft' | 'creative_suite' | 'artist_residence'
-          address: string
-          city: string
-          country: string
-          price_per_night: number
+          short_description?: string | null
+          category: 'artistic_studio' | 'design_loft' | 'creative_suite' | 'artist_residence'
           max_guests: number
           bedrooms: number
           bathrooms: number
           size_sqm: number
-          amenities: string[]
-          images: string[]
-          is_available?: boolean
-          owner_id: string
+          base_price_cents: number
+          image_url?: string | null
+          gallery_images?: string[]
+          amenities?: string[]
+          location_details?: Json | null
+          is_active?: boolean
         }
         Update: {
           id?: string
@@ -56,19 +54,18 @@ export interface Database {
           updated_at?: string
           name?: string
           description?: string
-          type?: 'artistic_studio' | 'design_loft' | 'creative_suite' | 'artist_residence'
-          address?: string
-          city?: string
-          country?: string
-          price_per_night?: number
+          short_description?: string | null
+          category?: 'artistic_studio' | 'design_loft' | 'creative_suite' | 'artist_residence'
           max_guests?: number
           bedrooms?: number
           bathrooms?: number
           size_sqm?: number
+          base_price_cents?: number
+          image_url?: string | null
+          gallery_images?: string[]
           amenities?: string[]
-          images?: string[]
-          is_available?: boolean
-          owner_id?: string
+          location_details?: Json | null
+          is_active?: boolean
         }
       }
       transportation_services: {
@@ -76,43 +73,43 @@ export interface Database {
           id: string
           created_at: string
           updated_at: string
+          slug: string
           name: string
-          type: 'car' | 'taxi' | 'chauffeur' | 'airport_transfer'
+          category: 'cars' | 'taxis' | 'chauffeurs' | 'airport_transfers'
           description: string
-          base_price: number
-          price_per_km: number
-          price_per_hour: number
-          max_passengers: number
-          is_available: boolean
-          provider_id: string
+          capacity: number
+          price_cents: number
+          image_url: string | null
+          features: string[]
+          is_active: boolean
         }
         Insert: {
           id?: string
           created_at?: string
           updated_at?: string
+          slug: string
           name: string
-          type: 'car' | 'taxi' | 'chauffeur' | 'airport_transfer'
+          category: 'cars' | 'taxis' | 'chauffeurs' | 'airport_transfers'
           description: string
-          base_price: number
-          price_per_km: number
-          price_per_hour: number
-          max_passengers: number
-          is_available?: boolean
-          provider_id: string
+          capacity: number
+          price_cents: number
+          image_url?: string | null
+          features?: string[]
+          is_active?: boolean
         }
         Update: {
           id?: string
           created_at?: string
           updated_at?: string
+          slug?: string
           name?: string
-          type?: 'car' | 'taxi' | 'chauffeur' | 'airport_transfer'
+          category?: 'cars' | 'taxis' | 'chauffeurs' | 'airport_transfers'
           description?: string
-          base_price?: number
-          price_per_km?: number
-          price_per_hour?: number
-          max_passengers?: number
-          is_available?: boolean
-          provider_id?: string
+          capacity?: number
+          price_cents?: number
+          image_url?: string | null
+          features?: string[]
+          is_active?: boolean
         }
       }
       bookings: {
@@ -121,16 +118,16 @@ export interface Database {
           created_at: string
           updated_at: string
           user_id: string
-          apartment_id?: string
-          transportation_id?: string
-          check_in_date?: string
-          check_out_date?: string
-          service_date?: string
-          service_time?: string
-          total_guests?: number
+          apartment_id: string | null
+          transportation_id: string | null
+          check_in_date: string | null
+          check_out_date: string | null
+          service_date: string | null
+          service_time: string | null
+          total_guests: number | null
           total_cents: number
           status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
-          special_requests?: string
+          special_requests: string | null
           contact_info: Json
         }
         Insert: {
@@ -138,16 +135,16 @@ export interface Database {
           created_at?: string
           updated_at?: string
           user_id: string
-          apartment_id?: string
-          transportation_id?: string
-          check_in_date?: string
-          check_out_date?: string
-          service_date?: string
-          service_time?: string
-          total_guests?: number
+          apartment_id?: string | null
+          transportation_id?: string | null
+          check_in_date?: string | null
+          check_out_date?: string | null
+          service_date?: string | null
+          service_time?: string | null
+          total_guests?: number | null
           total_cents: number
           status?: 'pending' | 'confirmed' | 'cancelled' | 'completed'
-          special_requests?: string
+          special_requests?: string | null
           contact_info: Json
         }
         Update: {
@@ -155,16 +152,16 @@ export interface Database {
           created_at?: string
           updated_at?: string
           user_id?: string
-          apartment_id?: string
-          transportation_id?: string
-          check_in_date?: string
-          check_out_date?: string
-          service_date?: string
-          service_time?: string
-          total_guests?: number
+          apartment_id?: string | null
+          transportation_id?: string | null
+          check_in_date?: string | null
+          check_out_date?: string | null
+          service_date?: string | null
+          service_time?: string | null
+          total_guests?: number | null
           total_cents?: number
           status?: 'pending' | 'confirmed' | 'cancelled' | 'completed'
-          special_requests?: string
+          special_requests?: string | null
           contact_info?: Json
         }
       }

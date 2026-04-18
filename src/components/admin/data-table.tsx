@@ -100,8 +100,9 @@ export function DataTable<T>({
                         {onEdit && (
                           <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="icon"
                             onClick={() => onEdit(item)}
+                            className="h-8 w-8"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -109,9 +110,9 @@ export function DataTable<T>({
                         {onDelete && (
                           <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="icon"
                             onClick={() => onDelete(item)}
-                            className="text-destructive hover:text-destructive"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

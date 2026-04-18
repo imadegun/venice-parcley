@@ -100,7 +100,7 @@ export function MarkdownEditor({
                 <Button
                   key={idx}
                   variant="ghost"
-                  size="icon-sm"
+                  size="icon"
                   onClick={Action.action}
                   disabled={Action.disabled}
                   className="h-8 w-8"

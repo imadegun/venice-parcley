@@ -76,7 +76,7 @@ export function AvailabilityChecker({ apartmentId, onBookingSelect }: Availabili
   const calculateTotalPrice = () => {
     if (!apartment) return 0
     const nights = differenceInDays(checkOutDate, checkInDate)
-    return nights * apartment.price_per_night
+    return nights * (apartment.base_price_cents / 100)
   }
 
   const handleBookingSelect = async () => {
@@ -196,7 +196,9 @@ export function AvailabilityChecker({ apartmentId, onBookingSelect }: Availabili
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 className="font-medium text-gray-900">{apartment.name}</h4>
-              <p className="text-sm text-gray-600">{apartment.address}, {apartment.city}</p>
+              <p className="text-sm text-gray-600">
+                {apartment.location_details?.address || 'Venice, Italy'}
+              </p>
               <div className="flex items-center gap-2 mt-2">
                 <Users className="h-4 w-4 text-gray-400" />
                 <span className="text-sm">Up to {apartment.max_guests} guests</span>
@@ -210,7 +212,7 @@ export function AvailabilityChecker({ apartmentId, onBookingSelect }: Availabili
                 </span>
               </div>
               <p className="text-sm text-gray-600">
-                €{apartment.price_per_night}/night × {nights} night{nights !== 1 ? 's' : ''}
+                €{(apartment.base_price_cents / 100).toFixed(0)}/night × {nights} night{nights !== 1 ? 's' : ''}
               </p>
             </div>
           </div>

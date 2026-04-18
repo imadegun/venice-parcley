@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { createServerSupabaseClient } from '@/lib/supabase'
 import { AnimatedGallery } from '@/components/apartments/animated-gallery'
 import { Container } from '@/components/layout/container'
+import { ApartmentBookingSection } from '@/components/booking/apartment-booking-section'
 
 interface ApartmentDetail {
   id: string
@@ -98,6 +99,11 @@ export default async function ApartmentDetailPage({ params }: ApartmentDetailPag
             </div>
           </section>
         )}
+
+        <section className="space-y-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Book this apartment</h2>
+          <ApartmentBookingSection apartmentId={apartment.id} />
+        </section>
       </div>
     </Container>
   )
