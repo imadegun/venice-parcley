@@ -47,8 +47,8 @@ export default async function ContentManagement() {
   ]
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="space-y-8 py-8">
+      <div className="animate-title">
         <h1 className="text-3xl font-bold text-gray-900">Content Management</h1>
         <p className="text-gray-600 mt-2">
           Manage all website content, images, and information.

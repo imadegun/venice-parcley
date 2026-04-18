@@ -1,4 +1,5 @@
 import { createServerAuthClient } from '@/lib/supabase-server'
+import { Container } from '@/components/layout/container'
 
 export default async function ContactPage() {
   const supabase = await createServerAuthClient()
@@ -16,12 +17,14 @@ export default async function ContactPage() {
   const title = menuItem?.label || 'Contact Us'
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">{title}</h1>
+    <Container spacing="xxl">
+      <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 animate-title">
+        {title}
+      </h1>
 
       {/* Map Section - Only show if map_embed is provided */}
       {mapEmbed && (
-        <div className="mb-8 rounded-xl overflow-hidden shadow-lg">
+        <div className="mb-12 rounded-xl overflow-hidden shadow-lg animate-title-delay-1">
           <div
             className="w-full h-96"
             dangerouslySetInnerHTML={{ __html: mapEmbed }}
@@ -32,7 +35,7 @@ export default async function ContactPage() {
       {/* Content Section */}
       {content ? (
         <div
-          className="prose max-w-none"
+          className="text-lg text-gray-600 font-mulish leading-8 max-w-4xl animate-title-delay-2"
           dangerouslySetInnerHTML={{ __html: content }}
         />
       ) : (
@@ -40,6 +43,6 @@ export default async function ContactPage() {
           <p className="text-gray-500">No content has been added yet.</p>
         </div>
       )}
-    </div>
+    </Container>
   )
 }

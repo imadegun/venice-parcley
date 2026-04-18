@@ -183,7 +183,145 @@
     transform-origin: center center;
   }
 
-  /* Custom Typography Classes */
+  /* Header entrance animation - smooth cubic-bezier */
+  @keyframes headerSlideDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-header-entrance {
+    animation: headerSlideDown 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    will-change: transform, opacity;
+  }
+
+  /* Title text animation - premium easing with slight overshoot */
+  @keyframes titleFadeInUp {
+    from {
+      transform: translateY(30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-title {
+    animation: titleFadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    will-change: transform, opacity;
+  }
+
+  .animate-title-delay-1 {
+    animation: titleFadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+   .animate-title-delay-2 {
+     animation: titleFadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+     opacity: 0;
+     will-change: transform, opacity;
+   }
+
+   /* Subtitle animation - smaller, earlier */
+   @keyframes subtitleFadeInUp {
+     from {
+       transform: translateY(20px);
+       opacity: 0;
+     }
+     to {
+       transform: translateY(0);
+       opacity: 1;
+     }
+   }
+
+   .animate-subtitle {
+     animation: subtitleFadeInUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+     will-change: transform, opacity;
+   }
+
+   .animate-subtitle-delay-1 {
+     animation: subtitleFadeInUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+     opacity: 0;
+     will-change: transform, opacity;
+   }
+
+   /* Body text animation - subtle fade in */
+   @keyframes bodyFadeIn {
+     from {
+       opacity: 0;
+     }
+     to {
+       opacity: 1;
+     }
+   }
+
+   .animate-body {
+     animation: bodyFadeIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+     will-change: opacity;
+   }
+
+   .animate-body-delay-1 {
+     animation: bodyFadeIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+     opacity: 0;
+     will-change: opacity;
+   }
+
+   .animate-body-delay-2 {
+     animation: bodyFadeIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
+     opacity: 0;
+     will-change: opacity;
+   }
+
+   /* Section animation - for entire content blocks */
+   @keyframes sectionFadeInUp {
+     from {
+       transform: translateY(40px);
+       opacity: 0;
+     }
+     to {
+       transform: translateY(0);
+       opacity: 1;
+     }
+   }
+
+   .animate-section {
+     animation: sectionFadeInUp 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+     will-change: transform, opacity;
+   }
+
+   .animate-section-delay-1 {
+     animation: sectionFadeInUp 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+     opacity: 0;
+     will-change: transform, opacity;
+   }
+
+   /* Accessibility: Respect user's motion preferences */
+   @media (prefers-reduced-motion: reduce) {
+     .animate-title,
+     .animate-title-delay-1,
+     .animate-title-delay-2,
+     .animate-subtitle,
+     .animate-subtitle-delay-1,
+     .animate-body,
+     .animate-body-delay-1,
+     .animate-body-delay-2,
+     .animate-section,
+     .animate-section-delay-1,
+     .animate-header-entrance {
+       animation: none !important;
+       opacity: 1 !important;
+       transform: none !important;
+     }
+   }
+
+   /* Custom Typography Classes */
   .font-headline {
     font-family: var(--font-family-headline);
     font-weight: 700;

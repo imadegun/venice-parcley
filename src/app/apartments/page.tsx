@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase'
+import { Container } from '@/components/layout/container'
 
 interface ApartmentCard {
   id: string
@@ -25,11 +26,13 @@ export default async function ApartmentsPage() {
   const apartments = (data || []) as ApartmentCard[]
 
   return (
-    <div className="container mx-auto px-4 pt-36 md:pt-40 pb-12">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">Luxury Apartments</h1>
-      <p className="text-lg text-gray-600 mb-8">
-        Discover our unique artistic apartments designed for art lovers and creative travelers.
-      </p>
+    <Container spacing="xxl">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8 animate-title">Luxury Apartments</h1>
+        <p className="text-lg text-gray-600 font-mulish leading-8 mb-12 max-w-4xl animate-title-delay-1">
+          Discover our unique artistic apartments designed for art lovers and creative travelers.
+        </p>
+      </div>
 
       {apartments.length === 0 ? (
         <div className="text-center py-12">
@@ -71,7 +74,7 @@ export default async function ApartmentsPage() {
             </Link>
           ))}
         </div>
-      )}
-    </div>
-  )
+       )}
+     </Container>
+   )
 }

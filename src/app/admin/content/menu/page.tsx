@@ -119,8 +119,8 @@ export default function MenuManagement() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 py-8">
+      <div className="flex justify-between items-center animate-title">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Menu Management</h1>
           <p className="text-gray-600 mt-2">

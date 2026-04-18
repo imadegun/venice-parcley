@@ -54,7 +54,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-title">
         <div>
           <h1 className="text-3xl font-semibold text-gray-900 font-bebas">Admin Dashboard</h1>
           <p className="text-gray-600 mt-2 font-mulish">

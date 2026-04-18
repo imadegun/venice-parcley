@@ -1,4 +1,5 @@
 import { createServerAuthClient } from '@/lib/supabase-server'
+import { Container } from '@/components/layout/container'
 
 export default async function AboutPage() {
   const supabase = await createServerAuthClient()
@@ -15,18 +16,20 @@ export default async function AboutPage() {
   const title = menuItem?.label || 'About Venice Parcley'
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">{title}</h1>
-      {content ? (
-        <div
-          className="prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
+    <Container spacing="xxl">
+      <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 animate-title">
+        {title}
+      </h1>
+       {content ? (
+         <div
+           className="text-lg text-gray-600 font-mulish leading-8 max-w-4xl animate-title-delay-1"
+           dangerouslySetInnerHTML={{ __html: content }}
+         />
       ) : (
         <div className="text-center py-12">
           <p className="text-gray-500">No content has been added yet.</p>
         </div>
       )}
-    </div>
+    </Container>
   )
 }

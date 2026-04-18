@@ -63,14 +63,14 @@ export default async function Home() {
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-[12px] md:text-sm uppercase tracking-[0.28em] text-slate-600 font-montserrat mb-5">
+            <p className="text-xs md:text-sm uppercase tracking-[0.28em] text-gray-600 font-montserrat mb-4 animate-subtitle">
               SHORELINE VIBES
             </p>
-            <h1 className="text-[30px] md:text-5xl font-semibold text-gray-900 leading-tight font-josefin mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 font-josefin animate-title-delay-1">
               Life at Shoreline, wrapped in artful calm and cinematic sea light.
             </h1>
-            <div className="mx-auto mb-7 h-[2px] w-24 bg-gradient-to-r from-transparent via-slate-500 to-transparent" />
-            <p className="text-base md:text-lg text-gray-600 font-mulish px-[30px] md:px-0 leading-8">
+            <div className="mx-auto mb-8 h-[2px] w-24 bg-gradient-to-r from-transparent via-gray-400 to-transparent" />
+            <p className="text-lg text-gray-600 font-mulish leading-8 max-w-2xl mx-auto px-4 md:px-0 animate-title-delay-2">
               Drift through curated spaces, coastal textures, and boutique rhythms designed for guests who savor design-forward stays.
             </p>
           </div>
@@ -81,8 +81,8 @@ export default async function Home() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-bebas">{homepageContent.featured.title}</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto font-mulish">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-bebas animate-title">{homepageContent.featured.title}</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto font-mulish leading-8 animate-title-delay-1">
               {homepageContent.featured.description}
             </p>
           </div>
@@ -143,8 +143,8 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-2 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 font-bebas">{homepageContent.about.title}</h2>
-              <p className="text-lg text-gray-600 mb-6 font-mulish">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 font-bebas animate-title">{homepageContent.about.title}</h2>
+              <p className="text-lg text-gray-600 mb-6 font-mulish leading-8 max-w-2xl animate-title-delay-1">
                 {homepageContent.about.content}
               </p>
               <div className="grid gap-4 md:grid-cols-3 mb-8">
@@ -181,8 +181,8 @@ export default async function Home() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-bebas">Artistic Spaces</h2>
-            <p className="text-lg text-gray-600 font-mulish">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 font-bebas animate-title">Artistic Spaces</h2>
+            <p className="text-lg text-gray-600 font-mulish leading-8 max-w-2xl mx-auto animate-title-delay-1">
               Explore the unique character of our artistic apartments
             </p>
           </div>
@@ -200,8 +200,8 @@ export default async function Home() {
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-teal-600 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-semibold mb-4 font-josefin">Ready for an Artistic Experience?</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto font-mulish">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 font-josefin animate-title">Ready for an Artistic Experience?</h2>
+          <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto font-mulish leading-8 animate-title-delay-1">
             Book your stay in one of Venice's most unique and inspiring apartments today.
           </p>
           <div className="flex gap-4 justify-center flex-col sm:flex-row">

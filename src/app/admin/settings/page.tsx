@@ -85,8 +85,8 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="space-y-8 py-8">
+      <div className="animate-title">
         <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
         <p className="text-gray-600 mt-2">
           Configure theme colors, logo settings, and other site preferences.

@@ -125,8 +125,8 @@ export default function AdminApartmentsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="space-y-8 py-8">
+      <div className="animate-title">
         <h1 className="text-3xl font-semibold text-gray-900">Apartments Management</h1>
         <p className="text-gray-600">Create, update, and delete apartment inventory.</p>
       </div>

@@ -65,8 +65,8 @@ export default async function UsersManagement() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 py-8">
+      <div className="flex items-center justify-between animate-title">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600 mt-2">

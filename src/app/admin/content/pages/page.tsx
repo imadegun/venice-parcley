@@ -91,8 +91,8 @@ export default function MenuPagesManagement() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="space-y-8 py-8">
+      <div className="animate-title">
         <h1 className="text-3xl font-bold text-gray-900">Menu Page Content</h1>
         <p className="text-gray-600 mt-2">
           Manage page content for each navigation menu item. Edit rich text for pages like About, Contact, etc.

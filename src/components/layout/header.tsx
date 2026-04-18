@@ -85,7 +85,7 @@ export function Header() {
     <>
       {/* Mobile Header */}
       <header
-        className="mobile-header fixed top-0 left-0 right-0 h-16 px-5 md:hidden z-[250]"
+        className="mobile-header fixed top-0 left-0 right-0 h-16 px-5 md:hidden z-[250] animate-header-entrance"
         style={{ backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#10223f' }}
       >
         <div className="flex h-full items-center justify-between">
@@ -113,7 +113,7 @@ export function Header() {
       <div className="hidden md:block">
       {/* Top Connector Bar */}
       <div
-        className="fixed top-0 left-0 right-0 z-[250] h-2 border-t-2"
+        className="fixed top-0 left-0 right-0 z-[250] h-2 border-t-2 animate-header-entrance"
         style={{
           background: themeSettings ? `linear-gradient(to right, ${themeSettings.theme_colors.header_bg_left}, ${themeSettings.theme_colors.header_bg_right})` : 'linear-gradient(to right, #003049, #1b211a)'
         }}

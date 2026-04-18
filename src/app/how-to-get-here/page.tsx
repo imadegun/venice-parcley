@@ -16,14 +16,14 @@ export default async function HowToGetHerePage() {
   const title = menuItem?.label || 'How to Get Here'
 
   return (
-    <Container className="py-16">
+    <Container spacing="xxl">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-serif font-semibold text-gray-900 mb-8">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 animate-title">
           {title}
         </h1>
         {content ? (
           <div
-            className="prose prose-lg max-w-none"
+            className="text-lg text-gray-600 font-mulish leading-8 max-w-4xl animate-title-delay-1"
             dangerouslySetInnerHTML={{ __html: content }}
           />
         ) : (
