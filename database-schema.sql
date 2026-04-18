@@ -357,6 +357,7 @@ CREATE TABLE menu_items (
   is_active BOOLEAN DEFAULT true,
   sort_order INTEGER DEFAULT 0,
   content TEXT, -- Rich text/HTML content for page associated with this menu item
+  map_embed TEXT, -- HTML iframe embed code for location map (used on contact page)
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

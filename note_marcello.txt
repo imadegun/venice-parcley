@@ -1,6 +1,6 @@
 font text LOGO = Garamond
 
-Menu : 
+Menu :
 - About
 - Apartments
 - Neigbourhood
@@ -9,21 +9,22 @@ Menu :
 
 
 todo
-- menu show hide
-- content
-- color manage in header
+- menu show hide ✓
+- content ✓ (Menu Page Content Management implemented)
+- color manage in header ✓
 
 
-hapus : 
+hapus :
 - transportation
 - driver
 - booking
 
 
-booking 
+booking
 - tombol booking link
 - akan link ke strip lain
 - setiap aprtment punya stripe sendiri
+
 
 Home text
 
@@ -34,5 +35,45 @@ Subheadline
 Intimate stays where timeless Venetian character meets understated contemporary living elegance. Central. Private. Effortless.
 
 Apartments
-Designed for discerning travelers, each residence offers a calm and curated atmosphere, just steps from the city�s most iconic landmarks. 
+Designed for discerning travelers, each residence offers a calm and curated atmosphere, just steps from the city�s most iconic landmarks.
 Thoughtful details, refined materials, and a sense of quiet exclusivity.
+
+
+---
+DATABASE MIGRATIONS REQUIRED
+============================
+Two columns needed for page content management:
+
+1. Content column (for all editable pages):
+   ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS content TEXT;
+
+2. Map embed column (for Contact page map):
+   ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS map_embed TEXT;
+
+Migration files:
+- villa-spa/migrations/001_add_content_to_menu_items.sql
+- villa-spa/migrations/002_add_map_embed_to_menu_items.sql
+
+After running migrations:
+1. Restart dev server: rm -rf .next && npm run dev
+2. Visit /admin/content/pages to edit page content
+3. For Contact page: add Google Maps embed code in "Location Map" field
+4. Content appears on frontend pages (About, Contact, Neighbourhood, How to Get Here)
+
+Note: /apartments page is excluded from editing (it's a dynamic listing)
+
+========pertanyaan ke marcello==========
+
+Hi Marcello, sorry to bother you. Could you please prepare:
+1. Contents for the detail page, as I checked the website and it's no longer there:
+- About
+- Neighborhood
+- How to get here
+- Contact & Google map link for "Venice parsley"
+2. Regarding the booking system, I have a question:
+- Will the booking system on the website be provided by another party? If so, I need a <script code> link from the provider.
+3. Regarding the online payment provider using STRIPE, is it also provided by another party? If so, I need a <script code> link to connect to the website.
+
+4. If the booking system and online payment for STRIPE are developed in-house, please confirm.
+5. Regarding the apartments:
+- Does each apartment have its own photo? I downloaded the apartment photos from the website, but I'm confused as I can't see the difference between apartments 1, 2, and 3. If so, please provide individual photos (in good resolution).

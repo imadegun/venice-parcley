@@ -15,6 +15,7 @@ interface MenuItem {
   is_active: boolean
   sort_order: number
   content?: string | null
+  map_embed?: string | null
 }
 
 export default function MenuPagesManagement() {
@@ -23,6 +24,7 @@ export default function MenuPagesManagement() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
   const [content, setContent] = useState('')
+  const [mapEmbed, setMapEmbed] = useState('')
 
   useEffect(() => {
     fetchMenuItems()
@@ -33,7 +35,12 @@ export default function MenuPagesManagement() {
       const response = await fetch('/api/admin/menu')
       if (response.ok) {
         const data = await response.json()
-        setMenuItems(data)
+        // Filter out system pages that should not be edited here
+        const nonEditablePaths = ['/apartments', '/login', '/register', '/admin']
+        const editableItems = data.filter((item: MenuItem) =>
+          item.is_active && !nonEditablePaths.includes(item.href)
+        )
+        setMenuItems(editableItems)
       }
     } catch (error) {
       console.error('Error fetching menu items:', error)
@@ -45,6 +52,7 @@ export default function MenuPagesManagement() {
   const openEditContent = (item: MenuItem) => {
     setSelectedItem(item)
     setContent(item.content || '')
+    setMapEmbed(item.map_embed || '')
     setDialogOpen(true)
   }
 
@@ -61,7 +69,8 @@ export default function MenuPagesManagement() {
           href: selectedItem.href,
           is_active: selectedItem.is_active,
           sort_order: selectedItem.sort_order,
-          content
+          content,
+          map_embed: mapEmbed
         })
       })
 
@@ -70,6 +79,7 @@ export default function MenuPagesManagement() {
         setDialogOpen(false)
         setSelectedItem(null)
         setContent('')
+        setMapEmbed('')
       }
     } catch (error) {
       console.error('Error saving page content:', error)
@@ -100,11 +110,18 @@ export default function MenuPagesManagement() {
                 <div>
                   <div className="font-medium">{item.label}</div>
                   <div className="text-sm text-gray-500">URL: {item.href}</div>
-                  {item.content && (
-                    <div className="text-xs text-green-600 mt-1">
-                      Content has been set
-                    </div>
-                  )}
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {item.content && (
+                      <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
+                        Content ✓
+                      </span>
+                    )}
+                    {item.map_embed && (
+                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
+                        Map ✓
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button variant="outline" size="sm" onClick={() => openEditContent(item)}>
@@ -127,18 +144,33 @@ export default function MenuPagesManagement() {
           </DialogHeader>
           <form onSubmit={saveContent} className="space-y-4">
             <div>
-              <Label htmlFor="content">Page Content</Label>
+              <Label htmlFor="content">Page Content (HTML)</Label>
               <Textarea
                 id="content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Enter page content (HTML or plain text)..."
-                className="min-h-[300px] mt-2"
+                placeholder="Enter page content... Supports HTML tags like <p>, <strong>, <ul>, <li>, etc."
+                className="min-h-[200px] mt-2"
               />
               <p className="text-xs text-gray-500 mt-1">
-                You can use HTML tags for formatting (e.g., {'<p>'}, {'<strong>'}, {'<em>'}, {'<ul>'}, {'<li>'}).
+                Supports HTML formatting. Leave empty if no content needed.
               </p>
             </div>
+
+            <div>
+              <Label htmlFor="map_embed">Location Map (Optional)</Label>
+              <Textarea
+                id="map_embed"
+                value={mapEmbed}
+                onChange={(e) => setMapEmbed(e.target.value)}
+                placeholder="Paste Google Maps embed iframe code..."
+                className="min-h-[100px] mt-2 font-mono text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Paste a Google Maps embed iframe. The map will display above the page content (useful for Contact page).
+              </p>
+            </div>
+
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
