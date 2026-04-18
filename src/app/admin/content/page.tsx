@@ -1,7 +1,7 @@
 import { requireRole } from '@/lib/auth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { FileText, Home, Image, Phone, Menu } from 'lucide-react'
+import { FileText, Home, Image, Phone, Menu, File } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function ContentManagement() {
@@ -37,6 +37,12 @@ export default async function ContentManagement() {
       description: 'Add, edit, and organize navigation menu items',
       href: '/admin/content/menu',
       icon: Menu
+    },
+    {
+      title: 'Menu Page Content',
+      description: 'Edit content for each menu item page (About, Contact, etc.)',
+      href: '/admin/content/pages',
+      icon: File
     }
   ]
 

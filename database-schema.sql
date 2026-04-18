@@ -356,6 +356,7 @@ CREATE TABLE menu_items (
   href TEXT NOT NULL,
   is_active BOOLEAN DEFAULT true,
   sort_order INTEGER DEFAULT 0,
+  content TEXT, -- Rich text/HTML content for page associated with this menu item
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

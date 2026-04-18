@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Plus, Edit, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 interface MenuItem {
   id: string
@@ -15,6 +14,17 @@ interface MenuItem {
   href: string
   is_active: boolean
   sort_order: number
+}
+
+// Convert text to URL-friendly slug
+const slugify = (text: string): string => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')           // Replace spaces with hyphens
+    .replace(/[^a-z0-9-]/g, '')     // Remove all non-alphanumeric except hyphens
+    .replace(/-+/g, '-')            // Replace multiple hyphens with single
+    .replace(/^-+|-+$/g, '')        // Trim hyphens from start/end
 }
 
 export default function MenuManagement() {
@@ -28,8 +38,7 @@ export default function MenuManagement() {
     is_active: true,
     sort_order: 0
   })
-  const router = useRouter()
-
+  const [hrefTouched, setHrefTouched] = useState(false) // Track if user manually edited href
   useEffect(() => {
     fetchMenuItems()
   }, [])
@@ -90,6 +99,7 @@ export default function MenuManagement() {
   const resetForm = () => {
     setFormData({ label: '', href: '', is_active: true, sort_order: 0 })
     setEditingItem(null)
+    setHrefTouched(false)
   }
 
   const openEditDialog = (item: MenuItem) => {
@@ -100,11 +110,7 @@ export default function MenuManagement() {
       is_active: item.is_active,
       sort_order: item.sort_order
     })
-    setDialogOpen(true)
-  }
-
-  const openCreateDialog = () => {
-    resetForm()
+    setHrefTouched(true) // Existing href is considered manually set
     setDialogOpen(true)
   }
 
@@ -122,12 +128,19 @@ export default function MenuManagement() {
           </p>
         </div>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreateDialog}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Menu Item
-            </Button>
+        <Dialog
+          open={dialogOpen}
+          onOpenChange={(open) => {
+            setDialogOpen(open)
+            if (!open) {
+              // Reset form state when dialog closes (cancel or submit)
+              resetForm()
+            }
+          }}
+        >
+          <DialogTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Menu Item
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -141,7 +154,12 @@ export default function MenuManagement() {
                 <Input
                   id="label"
                   value={formData.label}
-                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                  onChange={(e) => {
+                    const newLabel = e.target.value
+                    // Auto-generate href only if user hasn't manually edited it
+                    const newHref = hrefTouched ? formData.href : slugify(newLabel)
+                    setFormData({ ...formData, label: newLabel, href: newHref })
+                  }}
                   required
                 />
               </div>
@@ -150,7 +168,11 @@ export default function MenuManagement() {
                 <Input
                   id="href"
                   value={formData.href}
-                  onChange={(e) => setFormData({ ...formData, href: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, href: e.target.value })
+                    setHrefTouched(true) // Mark as manually edited
+                  }}
+                  onFocus={() => setHrefTouched(true)}
                   required
                 />
               </div>

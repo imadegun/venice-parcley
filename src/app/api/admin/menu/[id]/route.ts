@@ -3,18 +3,19 @@ import { createServerClient } from '@/lib/supabase'
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createServerClient()
     const body = await request.json()
+    const { id } = await params
 
-    const { label, href, is_active, sort_order } = body
+    const { label, href, is_active, sort_order, content } = body
 
     const { data, error } = await supabase
       .from('menu_items')
-      .update({ label, href, is_active, sort_order })
-      .eq('id', params.id)
+      .update({ label, href, is_active, sort_order, content })
+      .eq('id', id)
       .select()
       .single()
 
@@ -32,15 +33,16 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createServerClient()
+    const { id } = await params
 
     const { error } = await supabase
       .from('menu_items')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) {
       console.error('Error deleting menu item:', error)
