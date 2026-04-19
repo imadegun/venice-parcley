@@ -1,7 +1,7 @@
 import { requireRole } from '@/lib/auth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { FileText, Home, Image, Phone, Menu, File } from 'lucide-react'
+import { Home, Menu, File } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function ContentManagement() {
@@ -14,12 +14,17 @@ export default async function ContentManagement() {
       href: '/admin/content/home',
       icon: Home
     },
+    // DISABLED: Gallery feature not ready yet
+    /*
     {
       title: 'Gallery Management',
       description: 'Upload and organize apartment photos and images',
       href: '/admin/gallery',
       icon: Image
     },
+    */
+    // DISABLED: About & Contact managed via Menu section
+    /*
     {
       title: 'About Page',
       description: 'Edit company information and mission statement',
@@ -32,6 +37,7 @@ export default async function ContentManagement() {
       href: '/admin/content/contact',
       icon: Phone
     },
+    */
     {
       title: 'Menu Management',
       description: 'Add, edit, and organize navigation menu items',
@@ -85,21 +91,16 @@ export default async function ContentManagement() {
           <CardTitle>Content Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">✓</div>
               <p className="text-sm text-gray-600">Homepage</p>
               <p className="text-xs text-green-600">Published</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">○</div>
-              <p className="text-sm text-gray-600">Gallery</p>
-              <p className="text-xs text-yellow-600">Needs Images</p>
-            </div>
-            <div className="text-center">
               <div className="text-2xl font-bold text-green-600">✓</div>
-              <p className="text-sm text-gray-600">Contact</p>
-              <p className="text-xs text-green-600">Complete</p>
+              <p className="text-sm text-gray-600">Menu</p>
+              <p className="text-xs text-green-600">Active</p>
             </div>
           </div>
         </CardContent>

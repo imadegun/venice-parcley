@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home,
-  Image,
   Calendar,
   Users,
   Settings,
@@ -30,11 +29,14 @@ const adminNavItems = [
     href: '/admin/bookings',
     icon: Calendar
   },
+  // DISABLED: Gallery feature not ready yet
+  /*
   {
     title: 'Gallery',
     href: '/admin/gallery',
     icon: Image
   },
+  */
   {
     title: 'Content',
     href: '/admin/content',
