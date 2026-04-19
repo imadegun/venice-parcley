@@ -28,11 +28,10 @@ export async function POST(request: Request) {
 
       if (bookingId) {
         const supabase = createServerSupabaseClient()
-        await supabase
+        const { error } = await supabase
           .from('bookings')
           .update({
             status: 'confirmed',
-            special_requests: null,
             contact_info: {
               stripe_session_id: session.id,
               stripe_payment_intent: typeof session.payment_intent === 'string' ? session.payment_intent : null,
@@ -40,6 +39,11 @@ export async function POST(request: Request) {
           })
           .eq('id', bookingId)
           .eq('status', 'pending')
+
+        if (error) {
+          console.error('Error updating booking status:', error)
+          throw error
+        }
       }
     }
 

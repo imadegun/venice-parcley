@@ -197,7 +197,9 @@ export function AvailabilityChecker({ apartmentId, onBookingSelect }: Availabili
             <div>
               <h4 className="font-medium text-gray-900">{apartment.name}</h4>
               <p className="text-sm text-gray-600">
-                {apartment.location_details?.address || 'Venice, Italy'}
+                {typeof apartment.location_details === 'object' && apartment.location_details !== null && 'address' in apartment.location_details
+                  ? (apartment.location_details as { address?: string }).address || 'Venice, Italy'
+                  : 'Venice, Italy'}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <Users className="h-4 w-4 text-gray-400" />

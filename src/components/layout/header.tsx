@@ -119,21 +119,21 @@ export function Header() {
         }}
       />
 
-      {/* Floating Left Tab - BOOK NOW */}
-      <div className="fixed top-0 left-0 z-[250]">
-        <div
-          className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow cursor-pointer"
-          style={{
-            backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#003049',
-            borderRadius: '0 0 50px 0'
-          }}
-        >
-          <div className="flex items-center space-x-3 font-montserrat uppercase text-base md:text-lg tracking-wider font-semibold">
-            <Calendar className="w-6 h-6 md:w-7 md:h-7" />
-            <span>BOOK NOW</span>
-          </div>
-        </div>
-      </div>
+       {/* Floating Left Tab - BOOK NOW */}
+       <Link href="/apartments" className="fixed top-0 left-0 z-[250]">
+         <div
+           className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow"
+           style={{
+             backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#003049',
+             borderRadius: '0 0 50px 0'
+           }}
+         >
+           <div className="flex items-center space-x-3 font-montserrat uppercase text-base md:text-lg tracking-wider font-semibold">
+             <Calendar className="w-6 h-6 md:w-7 md:h-7" />
+             <span>BOOK NOW</span>
+           </div>
+         </div>
+       </Link>
 
       {/* Transparent Center Logo */}
       <div
