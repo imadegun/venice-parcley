@@ -59,12 +59,38 @@ export interface PropertyType {
 export interface HomepageContent {
   hero: HeroContent
   featured: {
-    title: string
-    description: string
+    title: {
+      en: string
+      it: string
+    }
+    description: {
+      en: string
+      it: string
+    }
   }
   about: {
-    title: string
-    content: string
+    title: {
+      en: string
+      it: string
+    }
+    content: {
+      en: string
+      it: string
+    }
+  }
+  intro?: {
+    tagline: {
+      en: string
+      it: string
+    }
+    title: {
+      en: string
+      it: string
+    }
+    description: {
+      en: string
+      it: string
+    }
   }
 }
 
@@ -248,14 +274,38 @@ export const websiteContent = {
 export const defaultHomepageContent: HomepageContent = {
   hero: websiteContent.hero,
   featured: {
-    title: 'Featured Apartments',
-    description:
-      'Experience Venice like never before in our carefully curated collection of artistic apartments.'
+    title: {
+      en: 'Featured Apartments',
+      it: 'Appartamenti in Evidenza'
+    },
+    description: {
+      en: 'Experience Venice like never before in our carefully curated collection of artistic apartments.',
+      it: 'Vivi Venezia come mai prima d\'ora nella nostra collezione curata di appartamenti artistici.'
+    }
   },
   about: {
-    title: 'About Venice Parcley',
-    content:
-      'We connect art lovers with extraordinary living spaces in Venice, offering a unique blend of luxury accommodation and artistic inspiration.'
+    title: {
+      en: 'About Venice Parcley',
+      it: 'Chi Siamo'
+    },
+    content: {
+      en: 'We connect art lovers with extraordinary living spaces in Venice, offering a unique blend of luxury accommodation and artistic inspiration.',
+      it: 'Connettiamo gli amanti dell\'arte con spazi abitativi straordinari a Venezia, offrendo un mix unico di alloggi di lusso e ispirazione artistica.'
+    }
+  },
+  intro: {
+    tagline: {
+      en: 'SHORELINE VIBES',
+      it: 'SHORELINE VIBES'
+    },
+    title: {
+      en: 'Life at Shoreline, wrapped in artful calm and cinematic sea light.',
+      it: 'Life at Shoreline, wrapped in artful calm and cinematic sea light.'
+    },
+    description: {
+      en: 'Drift through curated spaces, coastal textures, and boutique rhythms designed for guests who savor design-forward stays.',
+      it: 'Drift through curated spaces, coastal textures, and boutique rhythms designed for guests who savor design-forward stays.'
+    }
   }
 }
 
@@ -281,14 +331,60 @@ export async function getHomepageContent(): Promise<HomepageContent> {
     const { getPublishedContentSection } = await import('@/lib/content-service')
     const section = await getPublishedContentSection('homepage')
 
-    if (section?.payload && typeof section.payload === 'object' && !Array.isArray(section.payload)) {
-      return section.payload as unknown as HomepageContent
-    }
-  } catch {
-    // Fallback to default content when DB is unavailable
-  }
+    console.log('🔍 getHomepageContent: raw section payload:', JSON.stringify(section?.payload, null, 2))
+    console.log('🔍 getHomepageContent: section status:', section?.status, 'key:', section?.key)
 
-  return defaultHomepageContent
+    if (section?.payload && typeof section.payload === 'object' && !Array.isArray(section.payload)) {
+      const payload = section.payload as any
+
+      // Helper to merge localized text, ignoring empty strings
+      const mergeLocalized = (def: { en: string, it: string }, ovr: { en: string, it: string } | undefined) => {
+        if (!ovr) return def
+        return {
+          en: ovr.en?.trim() ? ovr.en : def.en,
+          it: ovr.it?.trim() ? ovr.it : def.it,
+        }
+      }
+
+      // Merge with defaults to ensure all required fields exist
+      const merged = {
+        ...defaultHomepageContent,
+        ...payload,
+        hero: {
+          ...defaultHomepageContent.hero,
+          ...payload.hero,
+          title: mergeLocalized(defaultHomepageContent.hero.title, payload.hero?.title),
+          subtitle: mergeLocalized(defaultHomepageContent.hero.subtitle, payload.hero?.subtitle),
+          ctaText: mergeLocalized(defaultHomepageContent.hero.ctaText, payload.hero?.ctaText),
+          backgroundImages: payload.hero?.backgroundImages?.length > 0
+            ? payload.hero.backgroundImages
+            : defaultHomepageContent.hero.backgroundImages,
+        },
+        featured: payload.featured ? {
+          title: mergeLocalized(defaultHomepageContent.featured.title, payload.featured?.title),
+          description: mergeLocalized(defaultHomepageContent.featured.description, payload.featured?.description),
+        } : defaultHomepageContent.featured,
+        about: payload.about ? {
+          title: mergeLocalized(defaultHomepageContent.about.title, payload.about?.title),
+          content: mergeLocalized(defaultHomepageContent.about.content, payload.about?.content),
+        } : defaultHomepageContent.about,
+        intro: payload.intro ? {
+          tagline: mergeLocalized(defaultHomepageContent.intro?.tagline || { en: '', it: '' }, payload.intro?.tagline),
+          title: mergeLocalized(defaultHomepageContent.intro?.title || { en: '', it: '' }, payload.intro?.title),
+          description: mergeLocalized(defaultHomepageContent.intro?.description || { en: '', it: '' }, payload.intro?.description),
+        } : defaultHomepageContent.intro,
+      } as HomepageContent
+      console.log('🔍 getHomepageContent: merged content:', JSON.stringify(merged, null, 2))
+      console.log('🔍 getHomepageContent: intro section:', JSON.stringify(merged.intro, null, 2))
+      return merged
+    }
+
+    console.log('⚠️ getHomepageContent: no payload found, using default content')
+    return defaultHomepageContent
+  } catch (error) {
+    console.error('❌ getHomepageContent error:', error)
+    return defaultHomepageContent
+  }
 }
 
 // In a real CMS, these would update a database

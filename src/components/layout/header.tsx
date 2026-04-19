@@ -101,10 +101,10 @@ export function Header() {
           <button
             type="button"
             onClick={toggleMenu}
-            className="flex items-center gap-2 font-montserrat uppercase tracking-[0.14em] text-sm font-semibold text-white"
+            className="flex items-center gap-2 font-montserrat uppercase tracking-[0.14em] text-sm font-semibold text-white group"
             aria-label="Toggle menu"
           >
-            <span>Menu</span>
+            <span className="transition-all duration-300 group-hover:tracking-widest">Menu</span>
             {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -119,21 +119,27 @@ export function Header() {
         }}
       />
 
-       {/* Floating Left Tab - BOOK NOW */}
-       <Link href="/apartments" className="fixed top-0 left-0 z-[250]">
-         <div
-           className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow"
-           style={{
-             backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#003049',
-             borderRadius: '0 0 50px 0'
-           }}
-         >
-           <div className="flex items-center space-x-3 font-montserrat uppercase text-base md:text-lg tracking-wider font-semibold">
-             <Calendar className="w-6 h-6 md:w-7 md:h-7" />
-             <span>BOOK NOW</span>
-           </div>
-         </div>
-       </Link>
+       {/* Floating Left Tab - BOOK NOW with elegant hover animation */}
+       <Link href="/apartments" className="fixed top-0 left-0 z-[250] group">
+          <div
+            className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.25)] transition-all duration-500 ease-out hover:scale-105"
+            style={{
+              backgroundColor: themeSettings?.theme_colors?.header_bg_left || '#003049',
+              borderRadius: '0 0 50px 0'
+            }}
+          >
+            <div className="flex items-center space-x-3 font-montserrat uppercase text-base md:text-lg tracking-wider font-semibold">
+              <Calendar className="w-6 h-6 md:w-7 md:h-7 transition-transform duration-500 ease-out group-hover:rotate-12 group-hover:scale-110" />
+              <span className="relative inline-block overflow-hidden">
+                <span className="relative block transition-all duration-500 ease-out group-hover:tracking-[0.2em] group-hover:text-yellow-200">
+                  BOOK NOW
+                </span>
+                {/* Elegant underline reveal */}
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-yellow-300 transform scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
+              </span>
+            </div>
+          </div>
+        </Link>
 
       {/* Transparent Center Logo */}
       <div
@@ -142,16 +148,16 @@ export function Header() {
         }`}
       >
         <Link href="/" className="flex flex-col items-center gap-1 opacity-90 hover:opacity-100 transition-opacity">
-          <span className="text-2xl md:text-3xl font-semibold text-gray-900 font-serif tracking-wide md:tracking-wider">Venice Parcley</span>
-          
+          <span className="text-2xl md:text-3xl font-semibold text-gray-900 font-serif tracking-wide md:tracking-wider">Venice Parsley</span>
+           
         </Link>
       </div>
 
-      {/* Floating Right Tab - MENU */}
-      <div className="fixed top-0 right-0 z-[250]">
+      {/* Floating Right Tab - MENU with elegant hover animation */}
+      <div className="fixed top-0 right-0 z-[250] group">
         <button
           onClick={toggleMenu}
-          className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-shadow cursor-pointer"
+          className="h-25 px-6 text-white flex items-center justify-center border-t-2 border-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.25)] transition-all duration-500 ease-out hover:scale-105 cursor-pointer"
           style={{
             backgroundColor: themeSettings?.theme_colors?.header_bg_right || '#1b211a',
             borderRadius: '0 0 0 50px'
@@ -159,7 +165,14 @@ export function Header() {
           aria-label="Toggle menu"
         >
           <div className="flex items-center space-x-3 font-montserrat uppercase text-base md:text-lg tracking-wider font-semibold">
-            <span>MENU</span>
+            <Menu className="w-6 h-6 md:w-7 md:h-7 transition-transform duration-500 ease-out group-hover:rotate-12 group-hover:scale-110" />
+            <span className="relative inline-block overflow-hidden">
+              <span className="relative block transition-all duration-500 ease-out group-hover:tracking-[0.2em] group-hover:text-yellow-200">
+                MENU
+              </span>
+              {/* Elegant underline reveal */}
+              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-yellow-300 transform scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
+            </span>
             {isMenuOpen ? <X className="w-6 h-6 md:w-7 md:h-7" /> : <Menu className="w-6 h-6 md:w-7 md:h-7" />}
           </div>
         </button>

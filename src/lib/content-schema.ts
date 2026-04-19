@@ -3,8 +3,8 @@ import { z } from 'zod'
 export const contentKeySchema = z.enum(['homepage', 'about', 'contact'])
 
 const localizedTextSchema = z.object({
-  en: z.string().min(1),
-  it: z.string().min(1),
+  en: z.string(),
+  it: z.string(),
 })
 
 export const homepageContentSchema = z.object({
@@ -12,15 +12,20 @@ export const homepageContentSchema = z.object({
     title: localizedTextSchema,
     subtitle: localizedTextSchema,
     ctaText: localizedTextSchema,
-    backgroundImages: z.array(z.string().url()).min(1),
+    backgroundImages: z.array(z.string().url()).min(0),
   }),
   featured: z.object({
-    title: z.string().min(1),
-    description: z.string().min(1),
+    title: localizedTextSchema,
+    description: localizedTextSchema,
   }).optional(),
   about: z.object({
-    title: z.string().min(1),
-    content: z.string().min(1),
+    title: localizedTextSchema,
+    content: localizedTextSchema,
+  }).optional(),
+  intro: z.object({
+    tagline: localizedTextSchema,
+    title: localizedTextSchema,
+    description: localizedTextSchema,
   }).optional(),
 })
 

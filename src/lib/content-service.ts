@@ -32,7 +32,11 @@ export async function getPublishedContentSection(key: ContentKey): Promise<Conte
     .eq('status', 'published')
     .single()
 
-  if (error) return null
+  if (error) {
+    console.log(`🔍 getPublishedContentSection: no published row for key="${key}" -`, error.message)
+    return null
+  }
+  console.log(`🔍 getPublishedContentSection: found published row for key="${key}"`, { id: data.id, status: data.status })
   return data as ContentSectionRow
 }
 
