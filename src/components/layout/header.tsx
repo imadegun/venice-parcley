@@ -165,7 +165,6 @@ export function Header() {
           aria-label="Toggle menu"
         >
           <div className="flex items-center space-x-3 font-montserrat uppercase text-base md:text-lg tracking-wider font-semibold">
-            <Menu className="w-6 h-6 md:w-7 md:h-7 transition-transform duration-500 ease-out group-hover:rotate-12 group-hover:scale-110" />
             <span className="relative inline-block overflow-hidden">
               <span className="relative block transition-all duration-500 ease-out group-hover:tracking-[0.2em] group-hover:text-yellow-200">
                 MENU
@@ -173,7 +172,7 @@ export function Header() {
               {/* Elegant underline reveal */}
               <span className="absolute bottom-0 left-0 w-full h-0.5 bg-yellow-300 transform scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
             </span>
-            {isMenuOpen ? <X className="w-6 h-6 md:w-7 md:h-7" /> : <Menu className="w-6 h-6 md:w-7 md:h-7" />}
+            {isMenuOpen ? <X className="w-6 h-6 md:w-7 md:h-7 transition-transform duration-500 ease-out group-hover:rotate-12 group-hover:scale-110" /> : <Menu className="w-6 h-6 md:w-7 md:h-7 transition-transform duration-500 ease-out group-hover:rotate-12 group-hover:scale-110" />}
           </div>
         </button>
       </div>
