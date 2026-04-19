@@ -327,6 +327,7 @@ export function getPropertyTypeById(id: string): PropertyType | undefined {
 }
 
 export async function getHomepageContent(): Promise<HomepageContent> {
+  // Try to get from database first
   try {
     const { getPublishedContentSection } = await import('@/lib/content-service')
     const section = await getPublishedContentSection('homepage')
@@ -374,17 +375,57 @@ export async function getHomepageContent(): Promise<HomepageContent> {
           description: mergeLocalized(defaultHomepageContent.intro?.description || { en: '', it: '' }, payload.intro?.description),
         } : defaultHomepageContent.intro,
       } as HomepageContent
+
       console.log('🔍 getHomepageContent: merged content:', JSON.stringify(merged, null, 2))
       console.log('🔍 getHomepageContent: intro section:', JSON.stringify(merged.intro, null, 2))
+
+      // Cache the content in localStorage for offline use
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('cached_homepage_content', JSON.stringify(merged))
+          localStorage.setItem('cached_homepage_timestamp', Date.now().toString())
+          console.log('💾 getHomepageContent: cached content in localStorage')
+        } catch (storageError) {
+          console.warn('⚠️ getHomepageContent: failed to cache in localStorage:', storageError)
+        }
+      }
+
       return merged
     }
 
-    console.log('⚠️ getHomepageContent: no payload found, using default content')
-    return defaultHomepageContent
+    console.log('⚠️ getHomepageContent: no payload found in database')
   } catch (error) {
-    console.error('❌ getHomepageContent error:', error)
-    return defaultHomepageContent
+    console.error('❌ getHomepageContent: database error:', error)
   }
+
+  // Database failed, try localStorage cache
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem('cached_homepage_content')
+      const timestamp = localStorage.getItem('cached_homepage_timestamp')
+
+      if (cached && timestamp) {
+        const age = Date.now() - parseInt(timestamp)
+        const maxAge = 24 * 60 * 60 * 1000 // 24 hours
+
+        if (age < maxAge) {
+          const parsedContent = JSON.parse(cached)
+          console.log('📦 getHomepageContent: loaded from localStorage cache (age:', Math.round(age / 1000 / 60), 'minutes)')
+          return parsedContent
+        } else {
+          console.log('⏰ getHomepageContent: localStorage cache expired, removing')
+          localStorage.removeItem('cached_homepage_content')
+          localStorage.removeItem('cached_homepage_timestamp')
+        }
+      }
+    } catch (storageError) {
+      console.warn('⚠️ getHomepageContent: error reading from localStorage:', storageError)
+    }
+  }
+
+  // Both database and cache failed, use defaults
+  console.log('📄 getHomepageContent: using default content')
+  return defaultHomepageContent
 }
 
 // In a real CMS, these would update a database
