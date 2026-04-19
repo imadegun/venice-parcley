@@ -194,7 +194,8 @@ export default async function Home() {
         </section>
       </ScrollReveal>
 
-      {/* Gallery Section */}
+      {/* Gallery Section - DISABLED: Feature not ready yet */}
+      {/*
       <ScrollReveal direction="up" duration={1000} delay={600}>
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
@@ -215,6 +216,7 @@ export default async function Home() {
           </div>
         </section>
       </ScrollReveal>
+      */}
 
       {/* CTA Section */}
       <ScrollReveal direction="up" duration={1000} delay={800}>
