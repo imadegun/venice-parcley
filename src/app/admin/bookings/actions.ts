@@ -117,6 +117,29 @@ export async function updateBooking(formData: FormData) {
   revalidatePath('/admin/bookings')
 }
 
+export async function updateBookingStatus(formData: FormData) {
+  await requireRole(['admin', 'administrator'])
+  const supabase = createServerSupabaseClient()
+  const bookingId = formData.get('bookingId')?.toString()
+  const status = formData.get('status')?.toString()
+
+  if (!bookingId) throw new Error('Booking ID is required')
+  if (!status || !['pending', 'confirmed', 'cancelled', 'completed'].includes(status)) {
+    throw new Error('Valid status is required')
+  }
+
+  const { error } = await supabase
+    .from('bookings')
+    .update({
+      status: status as any,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', bookingId)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin/bookings')
+}
+
 export async function deleteBooking(formData: FormData) {
   await requireRole(['admin', 'administrator'])
   const supabase = createServerSupabaseClient()

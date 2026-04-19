@@ -22,9 +22,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session
-      const bookingId = session.metadata?.booking_id
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent
+      const bookingId = paymentIntent.metadata?.booking_id
 
       if (bookingId) {
         const supabase = createServerSupabaseClient()
@@ -32,10 +32,7 @@ export async function POST(request: Request) {
           .from('bookings')
           .update({
             status: 'confirmed',
-            contact_info: {
-              stripe_session_id: session.id,
-              stripe_payment_intent: typeof session.payment_intent === 'string' ? session.payment_intent : null,
-            },
+            updated_at: new Date().toISOString(),
           })
           .eq('id', bookingId)
           .eq('status', 'pending')
@@ -44,18 +41,26 @@ export async function POST(request: Request) {
           console.error('Error updating booking status:', error)
           throw error
         }
+
+        console.log(`Booking ${bookingId} confirmed with payment ${paymentIntent.id}`)
       }
     }
 
-    if (event.type === 'checkout.session.expired') {
-      const session = event.data.object as Stripe.Checkout.Session
-      const bookingId = session.metadata?.booking_id
+    if (event.type === 'payment_intent.payment_failed') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent
+      const bookingId = paymentIntent.metadata?.booking_id
 
       if (bookingId) {
         const supabase = createServerSupabaseClient()
         await supabase
           .from('bookings')
-          .update({ status: 'cancelled' })
+          .update({
+            status: 'cancelled',
+            contact_info: {
+              stripe_payment_intent_id: paymentIntent.id,
+              payment_failed: true,
+            },
+          })
           .eq('id', bookingId)
           .eq('status', 'pending')
       }
