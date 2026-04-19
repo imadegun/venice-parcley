@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { requireRole } from '@/lib/auth'
 import { createServerSupabaseClient } from '@/lib/supabase'
@@ -137,7 +138,10 @@ export async function updateBookingStatus(formData: FormData) {
     .eq('id', bookingId)
 
   if (error) throw new Error(error.message)
+
+  // Force revalidation and redirect to ensure UI updates
   revalidatePath('/admin/bookings')
+  redirect('/admin/bookings')
 }
 
 export async function deleteBooking(formData: FormData) {

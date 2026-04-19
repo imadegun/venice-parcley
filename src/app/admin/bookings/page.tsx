@@ -180,6 +180,7 @@ export default async function AdminBookingsPage() {
                     <form action={updateBookingStatus} className="flex items-center gap-2">
                       <input type="hidden" name="bookingId" value={booking.id} />
                       <select
+                        key={`status-${booking.id}-${booking.status}-${booking.updated_at}`}
                         name="status"
                         defaultValue={booking.status}
                         className="h-9 w-32 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
