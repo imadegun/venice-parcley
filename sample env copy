@@ -1,4 +1,7 @@
-# Supabase Configuration
+# Database Configuration (Neon)
+DATABASE_URL=postgresql://neondb_owner:npg_yOWN0gYS4Ttn@ep-orange-fog-aoaxaxgn-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+# Supabase Configuration (legacy, for auth if needed)
 # Get these from your Supabase project settings
 NEXT_PUBLIC_SUPABASE_URL=https://zhdmgvhwrmstapywvfmu.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpoZG1ndmh3cm1zdGFweXd2Zm11Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzU3MjUsImV4cCI6MjA5MTMxMTcyNX0.B5KUFOzKTpeGkeZqrBhO1B5sj3Pk-0z1mRzshyseUNk

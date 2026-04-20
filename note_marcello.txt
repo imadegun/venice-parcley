@@ -134,3 +134,5 @@ pg_dump postgresql://postgres:PTsOtxrO0kI5Q39I@db.zhdmgvhwrmstapywvfmu.supabase.
 
 NEXT_PUBLIC_SUPABASE_URL=https://zhdmgvhwrmstapywvfmu.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_h6QChEma9dpxh408SmpFyw_t9Uznb8W
+
+pg_dump postgresql://postgres:PTsOtxrO0kI5Q39I@db.zhdmgvhwrmstapywvfmu.supabase.co:5432/postgres

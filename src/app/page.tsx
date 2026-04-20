@@ -8,7 +8,7 @@ import { HeroSection } from "@/components/hero/hero-section"
 import { PhotoGallery } from "@/components/gallery/photo-gallery"
 import { ArrowRight, MapPin, Star, Users } from "lucide-react"
 import { getHomepageContent } from "@/lib/content"
-import { createServerSupabaseClient } from "@/lib/supabase"
+import { query } from "@/lib/db"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import type { HeroContent } from "@/lib/content"
 
@@ -30,22 +30,24 @@ export default async function Home() {
   console.log('🔍 Home page: homepageContent:', JSON.stringify(homepageContent, null, 2))
   console.log('🔍 Home page: intro section:', JSON.stringify(homepageContent.intro, null, 2))
 
-  const supabase = createServerSupabaseClient()
-
   // Get current language (simplified - you may want to implement proper i18n detection)
   const currentLang = 'en' as 'en' | 'it' // TODO: Implement proper language detection
-  const { data: featuredApartments } = await supabase
-    .from('apartments')
-    .select('id, slug, name, short_description, base_price_cents, max_guests, bedrooms, gallery_images, image_url, is_active')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-    .limit(3)
+  const featuredApartmentsResult = await query(`
+    SELECT id, slug, name, short_description, base_price_cents, max_guests, bedrooms, gallery_images, image_url, is_active
+    FROM apartments
+    WHERE is_active = true
+    ORDER BY created_at DESC
+    LIMIT 3
+  `);
+  const featuredApartments = featuredApartmentsResult.rows;
 
-  const { data: heroApartments } = await supabase
-    .from('apartments')
-    .select('gallery_images, image_url')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
+  const heroApartmentsResult = await query(`
+    SELECT gallery_images, image_url
+    FROM apartments
+    WHERE is_active = true
+    ORDER BY created_at DESC
+  `);
+  const heroApartments = heroApartmentsResult.rows;
 
   const heroImages = Array.from(
     new Set(

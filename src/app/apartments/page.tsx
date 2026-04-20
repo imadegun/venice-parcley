@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin } from 'lucide-react'
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { query } from '@/lib/db'
 import { Container } from '@/components/layout/container'
 
 interface ApartmentCard {
@@ -16,14 +16,13 @@ interface ApartmentCard {
 }
 
 export default async function ApartmentsPage() {
-  const supabase = createServerSupabaseClient()
-  const { data } = await supabase
-    .from('apartments')
-    .select('id, slug, name, short_description, base_price_cents, max_guests, bedrooms, image_url, is_active')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-
-  const apartments = (data || []) as ApartmentCard[]
+  const apartmentsResult = await query(`
+    SELECT id, slug, name, short_description, base_price_cents, max_guests, bedrooms, image_url, is_active
+    FROM apartments
+    WHERE is_active = true
+    ORDER BY created_at DESC
+  `);
+  const apartments = apartmentsResult.rows as ApartmentCard[]
 
   return (
     <Container spacing="xxl">
