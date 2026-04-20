@@ -103,3 +103,19 @@ Hi Marcello, sorry to bother you. Could you please prepare:
 4. If the booking system and online payment for STRIPE are developed in-house, please confirm.
 5. Regarding the apartments:
 - Does each apartment have its own photo? I downloaded the apartment photos from the website, but I'm confused as I can't see the difference between apartments 1, 2, and 3. If so, please provide individual photos (in good resolution).
+
+
+======================
+
+I've updated the todo list with steps. Neon's free tier includes automated backups. Start by creating a Neon account at neon.tech.
+
+For migration (replace placeholders with your actual values from Supabase and Neon dashboards):
+
+Export from Supabase:
+pg_dump -h [SUPABASE_HOST] -U [SUPABASE_USER] -d [SUPABASE_DB] --no-owner --no-privileges -f supabase_dump.sql
+Import to Neon:
+pg_restore -h [NEON_HOST] -U [NEON_USER] -d [NEON_DB] -v supabase_dump.sql
+Replace connection details (host, user, db) from your providers' settings. Update your app's connection string to Neon's, then test.
+
+
++0
