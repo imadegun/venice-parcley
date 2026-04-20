@@ -63,6 +63,22 @@ export function UnifiedImageManager({
   const handleFiles = async (files: File[]) => {
     if (files.length === 0) return
 
+    // Validate file sizes
+    const maxSizeBytes = 50 * 1024 * 1024 // 50MB
+    const oversizedFiles = files.filter(file => file.size > maxSizeBytes)
+
+    if (oversizedFiles.length > 0) {
+      alert(`Some files are too large. Maximum file size is 50MB. Large files: ${oversizedFiles.map(f => f.name).join(', ')}`)
+      return
+    }
+
+    // Warn about large files
+    const largeFiles = files.filter(file => file.size > 2 * 1024 * 1024) // 2MB
+    if (largeFiles.length > 0) {
+      const proceed = confirm(`Some files are larger than 2MB (${largeFiles.map(f => `${f.name}: ${(f.size / 1024 / 1024).toFixed(1)}MB`).join(', ')}). This may affect page load speed. Continue?`)
+      if (!proceed) return
+    }
+
     setUploading(true)
     try {
       const remainingSlots = Math.max(0, maxFiles - images.length)
@@ -189,7 +205,10 @@ export function UnifiedImageManager({
             {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
             Choose Files
           </Button>
-          <p className="text-xs text-gray-400">Supports: JPG, PNG, WebP. Max {maxFiles} images.</p>
+          <div className="text-xs text-gray-400 space-y-1">
+            <p>Supports: JPG, PNG, WebP, GIF, AVIF. Max {maxFiles} images.</p>
+            <p>Recommended sizes: Hero images 1920×1080px (max 2MB), Thumbnails 800×600px (max 500KB)</p>
+          </div>
         </div>
       </div>
 

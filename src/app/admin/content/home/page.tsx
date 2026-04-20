@@ -85,12 +85,17 @@ export default function HomeContentManagement() {
       setIntroDescriptionIt(payload.intro.description?.it || '')
     } else {
       // Use defaults if no intro in payload
-      setIntroTaglineEn(defaultHomepageContent.intro.tagline.en)
-      setIntroTaglineIt(defaultHomepageContent.intro.tagline.it)
-      setIntroTitleEn(defaultHomepageContent.intro.title.en)
-      setIntroTitleIt(defaultHomepageContent.intro.title.it)
-      setIntroDescriptionEn(defaultHomepageContent.intro.description.en)
-      setIntroDescriptionIt(defaultHomepageContent.intro.description.it)
+      const defaultIntro = defaultHomepageContent.intro || {
+        tagline: { en: '', it: '' },
+        title: { en: '', it: '' },
+        description: { en: '', it: '' }
+      }
+      setIntroTaglineEn(defaultIntro.tagline.en)
+      setIntroTaglineIt(defaultIntro.tagline.it)
+      setIntroTitleEn(defaultIntro.title.en)
+      setIntroTitleIt(defaultIntro.title.it)
+      setIntroDescriptionEn(defaultIntro.description.en)
+      setIntroDescriptionIt(defaultIntro.description.it)
     }
     setMetaTitle('Venice Parcley - Luxury Artistic Apartments')
     setMetaDescription('Discover unique artistic apartments in Venice. Luxury accommodations designed for art lovers, creative souls, and discerning travelers.')
