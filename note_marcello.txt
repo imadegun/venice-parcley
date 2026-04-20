@@ -117,5 +117,20 @@ Import to Neon:
 pg_restore -h [NEON_HOST] -U [NEON_USER] -d [NEON_DB] -v supabase_dump.sql
 Replace connection details (host, user, db) from your providers' settings. Update your app's connection string to Neon's, then test.
 
+pg_dump -h postgresql://postgres: -U [SUPABASE_USER] -d [SUPABASE_DB] \
+  --no-owner \
+  --no-privileges \
+  --format=plain \
+  -f supabase_full_dump.sql 
 
+
+  sb_publishable_h6QChEma9dpxh408SmpFyw_t9Uznb8W  
 +0
+pg_dump postgresql://postgres:PTsOtxrO0kI5Q39I@db.zhdmgvhwrmstapywvfmu.supabase.co:5432/postgres
+ --no-owner \
+  --no-privileges \
+  --format=plain \
+  -f supabase_full_dump.sql
+
+NEXT_PUBLIC_SUPABASE_URL=https://zhdmgvhwrmstapywvfmu.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_h6QChEma9dpxh408SmpFyw_t9Uznb8W
