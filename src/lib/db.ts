@@ -1,12 +1,19 @@
-import { Pool } from 'pg';
+import { PrismaClient } from '@prisma/client'
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_yOWN0gYS4Ttn@ep-orange-fog-aoaxaxgn-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  })
+}
 
-// Create the pool
-export const pool = new Pool({
-  connectionString,
-  ssl: { rejectUnauthorized: false }
-});
+declare global {
+  var prisma: undefined | ReturnType<typeof prismaClientSingleton>
+}
 
-// Query helper
-export const query = (text: string, params?: any[]) => pool.query(text, params);
+export const db = globalThis.prisma ?? prismaClientSingleton()
+
+if (process.env.NODE_ENV !== 'production') globalThis.prisma = db
+
+// Helper utilities
+export * from '@prisma/client'
+export default db
