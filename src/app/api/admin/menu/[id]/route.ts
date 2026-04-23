@@ -10,11 +10,11 @@ export async function PUT(
     const body = await request.json()
     const { id } = await params
 
-    const { label, href, is_active, sort_order, content, map_embed } = body
+    const { title, href, is_active, sort_order, content, map_embed, image_url } = body
 
     const { data, error } = await supabase
       .from('menu_items')
-      .update({ label, href, is_active, sort_order, content, map_embed })
+      .update({ title, href, is_active, sort_order, content, map_embed, image_url })
       .eq('id', id)
       .select()
       .single()

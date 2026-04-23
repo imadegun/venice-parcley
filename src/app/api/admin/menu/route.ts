@@ -28,15 +28,15 @@ export async function POST(request: NextRequest) {
     const supabase = createServerClient()
     const body = await request.json()
 
-    const { label, href, is_active = true, sort_order = 0, content, map_embed } = body
+    const { title, href, is_active = true, sort_order = 0, content, map_embed, image_url } = body
 
-    if (!label || !href) {
-      return NextResponse.json({ error: 'Label and href are required' }, { status: 400 })
+    if (!title || !href) {
+      return NextResponse.json({ error: 'Title and href are required' }, { status: 400 })
     }
 
     const { data, error } = await supabase
       .from('menu_items')
-      .insert([{ label, href, is_active, sort_order, content, map_embed }])
+      .insert([{ title, href, is_active, sort_order, content, map_embed, image_url }])
       .select()
       .single()
 

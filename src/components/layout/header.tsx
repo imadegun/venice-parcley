@@ -6,7 +6,7 @@ import { Calendar, Menu, X } from 'lucide-react'
 
 interface MenuItem {
   id: string
-  label: string
+  title: Record<string, string>
   href: string
   is_active: boolean
   sort_order: number
@@ -52,11 +52,11 @@ export function Header() {
       console.error('Error fetching menu items:', error)
       // Fallback to default menu items
       setMenuItems([
-        { id: '1', href: '/about', label: 'About', is_active: true, sort_order: 1 },
-        { id: '2', href: '/apartments', label: 'Apartments', is_active: true, sort_order: 2 },
-        { id: '3', href: '/neighbourhood', label: 'Neighbourhood', is_active: true, sort_order: 3 },
-        { id: '4', href: '/how-to-get-here', label: 'How to get here', is_active: true, sort_order: 4 },
-        { id: '5', href: '/contact', label: 'Contact with map', is_active: true, sort_order: 5 },
+        { id: '1', href: '/about', title: { en: 'About' }, is_active: true, sort_order: 1 },
+        { id: '2', href: '/apartments', title: { en: 'Apartments' }, is_active: true, sort_order: 2 },
+        { id: '3', href: '/neighbourhood', title: { en: 'Neighbourhood' }, is_active: true, sort_order: 3 },
+        { id: '4', href: '/how-to-get-here', title: { en: 'How to get here' }, is_active: true, sort_order: 4 },
+        { id: '5', href: '/contact', title: { en: 'Contact with map' }, is_active: true, sort_order: 5 },
       ])
     }
   }
@@ -205,7 +205,7 @@ export function Header() {
                     onClick={closeMenu}
                     className="block px-6 py-2 text-lg font-medium text-white hover:text-yellow-300 hover:translate-x-2 transition-all duration-200"
                   >
-                    › {item.label}
+                    › {item.title?.en}
                   </Link>
                 </li>
               ))}
@@ -241,7 +241,7 @@ export function Header() {
                     onClick={closeMenu}
                     className="block px-8 py-3 text-xl font-medium text-white hover:text-yellow-300 hover:translate-x-4 transition-all duration-200"
                   >
-                    › {item.label}
+                    › {item.title?.en}
                   </Link>
                 </li>
               ))}

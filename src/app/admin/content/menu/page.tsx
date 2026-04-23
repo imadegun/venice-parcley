@@ -10,7 +10,7 @@ import { Plus, Edit, Trash2 } from 'lucide-react'
 
 interface MenuItem {
   id: string
-  label: string
+  title: Record<string, string>
   href: string
   is_active: boolean
   sort_order: number
@@ -33,7 +33,8 @@ export default function MenuManagement() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
   const [formData, setFormData] = useState({
-    label: '',
+    title_en: '',
+    title_it: '',
     href: '',
     is_active: true,
     sort_order: 0
@@ -64,10 +65,20 @@ export default function MenuManagement() {
       const url = editingItem ? `/api/admin/menu/${editingItem.id}` : '/api/admin/menu'
       const method = editingItem ? 'PUT' : 'POST'
 
+      const payload = {
+        title: {
+          en: formData.title_en,
+          it: formData.title_it
+        },
+        href: formData.href,
+        is_active: formData.is_active,
+        sort_order: formData.sort_order
+      }
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       })
 
       if (response.ok) {
@@ -97,7 +108,7 @@ export default function MenuManagement() {
   }
 
   const resetForm = () => {
-    setFormData({ label: '', href: '', is_active: true, sort_order: 0 })
+    setFormData({ title_en: '', title_it: '', href: '', is_active: true, sort_order: 0 })
     setEditingItem(null)
     setHrefTouched(false)
   }
@@ -105,7 +116,8 @@ export default function MenuManagement() {
   const openEditDialog = (item: MenuItem) => {
     setEditingItem(item)
     setFormData({
-      label: item.label,
+      title_en: item.title?.en || '',
+      title_it: item.title?.it || '',
       href: item.href,
       is_active: item.is_active,
       sort_order: item.sort_order
@@ -150,17 +162,27 @@ export default function MenuManagement() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="label">Label</Label>
+                <Label htmlFor="title_en">Title (English)</Label>
                 <Input
-                  id="label"
-                  value={formData.label}
+                  id="title_en"
+                  value={formData.title_en}
                   onChange={(e) => {
-                    const newLabel = e.target.value
+                    const newTitle = e.target.value
                     // Auto-generate href only if user hasn't manually edited it
-                    const newHref = hrefTouched ? formData.href : slugify(newLabel)
-                    setFormData({ ...formData, label: newLabel, href: newHref })
+                    const newHref = hrefTouched ? formData.href : slugify(newTitle)
+                    setFormData({ ...formData, title_en: newTitle, href: newHref })
                   }}
                   required
+                />
+              </div>
+              <div>
+                <Label htmlFor="title_it">Title (Italian)</Label>
+                <Input
+                  id="title_it"
+                  value={formData.title_it}
+                  onChange={(e) => {
+                    setFormData({ ...formData, title_it: e.target.value })
+                  }}
                 />
               </div>
               <div>
@@ -217,7 +239,7 @@ export default function MenuManagement() {
             {menuItems.map((item) => (
               <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <div className="font-medium">{item.label}</div>
+                  <div className="font-medium">{item.title?.en}</div>
                   <div className="text-sm text-gray-500">{item.href}</div>
                   <div className="text-xs text-gray-400">Order: {item.sort_order}</div>
                 </div>
