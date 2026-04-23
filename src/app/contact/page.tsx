@@ -12,15 +12,25 @@ export default async function ContactPage() {
     .eq('is_active', true)
     .single()
 
-  const content = menuItem?.content
+  const content = menuItem?.content?.en
   const mapEmbed = menuItem?.map_embed
-  const title = menuItem?.label || 'Contact Us'
+  const title = menuItem?.title?.en || 'Contact Us'
 
   return (
     <Container spacing="xxl">
       <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 animate-title">
         {title}
       </h1>
+
+      {menuItem?.image_url && (
+        <div className="mb-8 animate-title-delay-1">
+          <img
+            src={menuItem.image_url}
+            alt={title}
+            className="w-full max-w-2xl mx-auto rounded-lg shadow-lg"
+          />
+        </div>
+      )}
 
       {/* Map Section - Only show if map_embed is provided */}
       {mapEmbed && (
