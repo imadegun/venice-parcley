@@ -163,15 +163,15 @@ export function UnifiedImageManager({
   return (
     <div className="space-y-6">
       {images.length > 0 && previewImage && (
-        <div className="relative overflow-hidden rounded-xl border bg-black/5 aspect-[16/9]">
+        <div className="relative overflow-hidden rounded-lg border bg-black/5 w-32 h-20">
           <img
             key={`${previewImage}-${previewIndex}`}
             src={previewImage}
             alt={`Main preview ${previewIndex + 1}`}
-            className="w-full h-full object-contain animate-[fadeIn_750ms_ease-in-out]"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-            Main Preview #{previewIndex + 1}
+          <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 py-0.5 rounded">
+            #{previewIndex + 1}
           </div>
         </div>
       )}
@@ -199,7 +199,7 @@ export function UnifiedImageManager({
           />
           <Button
             variant="secondary"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={(e) => { e.preventDefault(); fileInputRef.current?.click() }}
             disabled={uploading || images.length >= maxFiles}
           >
             {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
@@ -282,12 +282,12 @@ export function UnifiedImageManager({
           {images.length < maxFiles && (
             <Card className="border-dashed border-2 hover:border-blue-400 transition-colors aspect-square">
               <div className="w-full h-full flex items-center justify-center">
-                <Button
-                  variant="ghost"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="flex flex-col items-center gap-2 text-gray-500 hover:text-gray-700"
-                >
+                  <Button
+                    variant="ghost"
+                    onClick={(e) => { e.preventDefault(); fileInputRef.current?.click() }}
+                    disabled={uploading}
+                    className="flex flex-col items-center gap-2 text-gray-500 hover:text-gray-700"
+                  >
                   <Upload className="h-8 w-8" />
                   <span className="text-sm">Add more</span>
                 </Button>
@@ -304,16 +304,7 @@ export function UnifiedImageManager({
         )}
       </div>
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-      `}</style>
+
     </div>
   )
 }

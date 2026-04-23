@@ -5,17 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
 import { Edit } from 'lucide-react'
 
 interface MenuItem {
   id: string
-  label: string
+  title?: {en?: string, it?: string} | null
   href: string
   is_active: boolean
   sort_order: number
   content?: string | null
   map_embed?: string | null
+  image_url?: string | null
 }
 
 export default function MenuPagesManagement() {
@@ -23,8 +23,13 @@ export default function MenuPagesManagement() {
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
+
+  // Content states
   const [content, setContent] = useState('')
   const [mapEmbed, setMapEmbed] = useState('')
+
+  // Image state
+  // const [pageImage, setPageImage] = useState({ images: [] as string[], mainImageIndex: 0 })
 
   useEffect(() => {
     fetchMenuItems()
@@ -37,7 +42,7 @@ export default function MenuPagesManagement() {
         const data = await response.json()
         // Filter out system pages that should not be edited here
         const nonEditablePaths = ['/apartments', '/login', '/register', '/admin']
-        const editableItems = data.filter((item: MenuItem) =>
+        const editableItems = data.filter((item) =>
           item.is_active && !nonEditablePaths.includes(item.href)
         )
         setMenuItems(editableItems)
@@ -53,6 +58,10 @@ export default function MenuPagesManagement() {
     setSelectedItem(item)
     setContent(item.content || '')
     setMapEmbed(item.map_embed || '')
+    // setPageImage({
+    //   images: item.image_url ? [item.image_url] : [],
+    //   mainImageIndex: 0
+    // })
     setDialogOpen(true)
   }
 
@@ -65,12 +74,13 @@ export default function MenuPagesManagement() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          label: selectedItem.label,
+          label: selectedItem.title?.en || '',
           href: selectedItem.href,
           is_active: selectedItem.is_active,
           sort_order: selectedItem.sort_order,
-          content,
-          map_embed: mapEmbed
+          content: content,
+          map_embed: mapEmbed,
+          // image_url: pageImage.images[0] || null
         })
       })
 
@@ -80,6 +90,7 @@ export default function MenuPagesManagement() {
         setSelectedItem(null)
         setContent('')
         setMapEmbed('')
+        // setPageImage({ images: [], mainImageIndex: 0 })
       }
     } catch (error) {
       console.error('Error saving page content:', error)
@@ -108,20 +119,25 @@ export default function MenuPagesManagement() {
             {menuItems.map((item) => (
               <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <div className="font-medium">{item.label}</div>
+                  <div className="font-medium">{item.title?.en || 'Untitled'}</div>
                   <div className="text-sm text-gray-500">URL: {item.href}</div>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {item.content && (
-                      <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
-                        Content ✓
-                      </span>
-                    )}
-                    {item.map_embed && (
-                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
-                        Map ✓
-                      </span>
-                    )}
-                  </div>
+                   <div className="flex flex-wrap gap-2 mt-1">
+                     {item.content && (
+                       <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
+                         Content ✓
+                       </span>
+                     )}
+                     {item.image_url && (
+                       <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
+                         Image ✓
+                       </span>
+                     )}
+                     {item.map_embed && (
+                       <span className="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 rounded">
+                         Map ✓
+                       </span>
+                     )}
+                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button variant="outline" size="sm" onClick={() => openEditContent(item)}>
@@ -135,41 +151,41 @@ export default function MenuPagesManagement() {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={dialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Edit Page Content: {selectedItem?.label}
+              Edit Page Content: {selectedItem?.title?.en || 'Page'}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={saveContent} className="space-y-4">
-            <div>
-              <Label htmlFor="content">Page Content (HTML)</Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Enter page content... Supports HTML tags like <p>, <strong>, <ul>, <li>, etc."
-                className="min-h-[200px] mt-2"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Supports HTML formatting. Leave empty if no content needed.
-              </p>
-            </div>
+            <form onSubmit={saveContent} className="space-y-6">
+              <div>
+                <label htmlFor="content">Page Content (HTML)</label>
+                <Textarea
+                  id="content"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Enter page content..."
+                    className="min-h-80 mt-2"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Supports HTML formatting. Leave empty if no content needed.
+                </p>
+              </div>
 
-            <div>
-              <Label htmlFor="map_embed">Location Map (Optional)</Label>
-              <Textarea
-                id="map_embed"
-                value={mapEmbed}
-                onChange={(e) => setMapEmbed(e.target.value)}
-                placeholder="Paste Google Maps embed iframe code..."
-                className="min-h-[100px] mt-2 font-mono text-sm"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Paste a Google Maps embed iframe. The map will display above the page content (useful for Contact page).
-              </p>
-            </div>
+              <div>
+                <label htmlFor="map_embed">Location Map (Optional)</label>
+                <Textarea
+                  id="map_embed"
+                  value={mapEmbed}
+                  onChange={(e) => setMapEmbed(e.target.value)}
+                  placeholder="Paste Google Maps embed iframe code..."
+                  className="min-h-[100px] mt-2 font-mono text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Paste a Google Maps embed iframe. The map will display above the page content (useful for Contact page).
+                </p>
+              </div>
 
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>

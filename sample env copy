@@ -17,3 +17,9 @@ RESEND_API_KEY=re_xxx
 
 # Application URL
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+
+# Export schema + data (lengkap)
+pg_dump "postgresql://postgres.zhdmgvhwrmstapywvfmu:kD3G3tfOcxnHsmSb@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres" > backup_database.sql
+
+"C:\Program Files\PostgreSQL\17\bin\pg_dump.exe" "postgresql://postgres.zhdmgvhwrmstapywvfmu:kD3G3tfOcxnHsmSb@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres" > backup_database.sql
